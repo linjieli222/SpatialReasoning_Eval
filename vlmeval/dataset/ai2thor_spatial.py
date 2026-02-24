@@ -19,19 +19,20 @@ class AI2ThorPathTracing(ImageMCQDataset):
     """
     AI2Thor Path Tracing QA Dataset.
     Source: linjieli222/ai2thor-path-tracing-qa-v7
-    Uses only topdown_image (single image per sample).
+    Uses topdown_image, optionally with sideview image.
     4-choice MCQ (A/B/C/D).
     """
 
     TYPE = 'MCQ'
 
-    def __init__(self, dataset='AI2ThorPathTracing', nsamples=None, **kwargs):
+    def __init__(self, dataset='AI2ThorPathTracing', use_sideview=False, nsamples=None, **kwargs):
+        self.use_sideview = use_sideview
         self.nsamples = nsamples
         super().__init__(dataset=dataset, **kwargs)
 
     @classmethod
     def supported_datasets(cls):
-        return ['AI2ThorPathTracing']
+        return ['AI2ThorPathTracing', 'AI2ThorPathTracing_sideview']
 
     def load_data(self, dataset):
         from datasets import load_dataset
@@ -46,15 +47,28 @@ class AI2ThorPathTracing(ImageMCQDataset):
                 break
 
             # Convert topdown_image to base64
-            img_b64 = pil_to_base64(ex['topdown_image'])
+            img_list = [pil_to_base64(ex['topdown_image'])]
+
+            question = ex['question']
+
+            if self.use_sideview:
+                sv_img = ex.get('sideview_image') or ex.get('sideview_images')
+                if sv_img is not None:
+                    if isinstance(sv_img, list):
+                        for img_item in sv_img:
+                            img_list.append(pil_to_base64(img_item))
+                    else:
+                        img_list.append(pil_to_base64(sv_img))
+
+            img = img_list if len(img_list) > 1 else img_list[0]
 
             # Map choices list to A/B/C/D
             choices = ex['choices']
 
             records.append({
                 'index': len(records),
-                'image': img_b64,
-                'question': ex['question'],
+                'image': img,
+                'question': question,
                 'A': choices[0] if len(choices) > 0 else '',
                 'B': choices[1] if len(choices) > 1 else '',
                 'C': choices[2] if len(choices) > 2 else '',
@@ -68,7 +82,7 @@ class AI2ThorPathTracing(ImageMCQDataset):
 class AI2ThorPerspective_NoArrow(ImageMCQDataset):
     """
     AI2Thor Perspective QA Dataset (No Arrow version).
-    Source: weikaih/ai2thor-perspective-qa-800-balanced-val-v3
+    Source: weikaih/ai2thor-perspective-v3-278-human-filter-with-obj-name
     Uses marked_image_no_arrow and question_no_arrow.
     2-choice MCQ (A/B).
 
@@ -155,7 +169,7 @@ class AI2ThorPerspective_NoArrow(ImageMCQDataset):
         from datasets import load_dataset
 
         # Load all splits from HuggingFace
-        hf_ds = load_dataset('weikaih/ai2thor-perspective-qa-800-balanced-val-v3')
+        hf_ds = load_dataset('weikaih/ai2thor-perspective-v3-278-human-filter-with-obj-name')
 
         records = []
         done = False
@@ -194,7 +208,7 @@ class AI2ThorPerspective_NoArrow(ImageMCQDataset):
 class AI2ThorPerspective_Arrow(ImageMCQDataset):
     """
     AI2Thor Perspective QA Dataset (With Arrow version).
-    Source: weikaih/ai2thor-perspective-qa-800-balanced-val-v3
+    Source: weikaih/ai2thor-perspective-v3-278-human-filter-with-obj-name
     Uses marked_image_with_arrow and question_with_arrow.
     2-choice MCQ (A/B).
 
@@ -267,7 +281,7 @@ class AI2ThorPerspective_Arrow(ImageMCQDataset):
         from datasets import load_dataset
 
         # Load all splits from HuggingFace
-        hf_ds = load_dataset('weikaih/ai2thor-perspective-qa-800-balanced-val-v3')
+        hf_ds = load_dataset('weikaih/ai2thor-perspective-v3-278-human-filter-with-obj-name')
 
         records = []
         global_idx = 0
@@ -291,6 +305,219 @@ class AI2ThorPerspective_Arrow(ImageMCQDataset):
                     'B': choices[1] if len(choices) > 1 else '',
                     'answer': ex['answer'],
                     'category': split_name,  # Use split name for 6-category breakdown
+                })
+                global_idx += 1
+
+        return pd.DataFrame(records)
+
+
+class HabitatPerspective_NoArrow(ImageMCQDataset):
+    """
+    Habitat Perspective QA Dataset (No Arrow version).
+    Source: weikaih/habitat-perspective-qa-val-v2
+    Uses marked_image_no_arrow and question_no_arrow.
+    2-choice MCQ (A/B).
+
+    Categories (6 splits):
+    - distance_closer (150)
+    - distance_further (150)
+    - position_left_left (149)
+    - position_left_right (144)
+    - position_right_left (128)
+    - position_right_right (112)
+
+    Overall is computed as unweighted average of 6 category accuracies.
+    """
+
+    TYPE = 'MCQ'
+    HF_REPO = 'weikaih/habitat-perspective-qa-val-v2'
+
+    def __init__(self, dataset='HabitatPerspective_NoArrow', nsamples=None, **kwargs):
+        self.nsamples = nsamples
+        super().__init__(dataset=dataset, **kwargs)
+
+    @classmethod
+    def supported_datasets(cls):
+        return ['HabitatPerspective_NoArrow']
+
+    def evaluate(self, eval_file, **judge_kwargs):
+        """Custom evaluate that computes Overall as unweighted average of category accuracies."""
+        import numpy as np
+        from ..smp import load, dump
+
+        suffix = eval_file.split('.')[-1]
+        result_file = eval_file.replace(f'.{suffix}', f'_result.{suffix}')
+
+        data = load(eval_file)
+
+        if 'hit' not in data.columns:
+            for i in range(len(data)):
+                item = data.iloc[i]
+                pred = str(item.get('prediction', ''))
+                gt = str(item.get('answer', ''))
+                hit = 1 if pred.strip().upper() == gt.strip().upper() else 0
+                if hit == 0 and gt.strip().upper() in pred.strip().upper():
+                    hit = 1
+                data.loc[data.index[i], 'hit'] = hit
+            dump(data, result_file)
+
+        category_acc = {}
+        categories = data['category'].unique()
+
+        for cat in categories:
+            cat_data = data[data['category'] == cat]
+            acc = cat_data['hit'].mean() * 100
+            category_acc[cat] = acc
+
+        overall_acc = np.mean(list(category_acc.values()))
+
+        res = {'Category': ['Overall'], 'Accuracy': [overall_acc], 'Count': [len(data)]}
+        for cat in sorted(categories):
+            cat_count = len(data[data['category'] == cat])
+            res['Category'].append(cat)
+            res['Accuracy'].append(category_acc[cat])
+            res['Count'].append(cat_count)
+
+        res_df = pd.DataFrame(res)
+        score_file = eval_file.replace(f'.{suffix}', '_acc.csv')
+        dump(res_df, score_file)
+
+        return res_df
+
+    def load_data(self, dataset):
+        from datasets import load_dataset
+
+        hf_ds = load_dataset(self.HF_REPO)
+
+        records = []
+        done = False
+        for split_name in hf_ds.keys():
+            if done:
+                break
+            for ex in hf_ds[split_name]:
+                if self.nsamples is not None and len(records) >= self.nsamples:
+                    done = True
+                    break
+
+                img_b64 = pil_to_base64(ex['marked_image_no_arrow'])
+
+                choices_raw = ex['answer_choices']
+                if isinstance(choices_raw, str):
+                    choices = json.loads(choices_raw)
+                else:
+                    choices = choices_raw
+
+                records.append({
+                    'index': len(records),
+                    'image': img_b64,
+                    'question': ex['question_no_arrow'],
+                    'A': choices[0] if len(choices) > 0 else '',
+                    'B': choices[1] if len(choices) > 1 else '',
+                    'answer': ex['answer'],
+                    'category': split_name,
+                })
+
+        return pd.DataFrame(records)
+
+
+class HabitatPerspective_Arrow(ImageMCQDataset):
+    """
+    Habitat Perspective QA Dataset (With Arrow version).
+    Source: weikaih/habitat-perspective-qa-val-v2
+    Uses marked_image_with_arrow and question_with_arrow.
+    2-choice MCQ (A/B).
+
+    Categories (6 splits):
+    - distance_closer (150)
+    - distance_further (150)
+    - position_left_left (149)
+    - position_left_right (144)
+    - position_right_left (128)
+    - position_right_right (112)
+
+    Overall is computed as unweighted average of 6 category accuracies.
+    """
+
+    TYPE = 'MCQ'
+    HF_REPO = 'weikaih/habitat-perspective-qa-val-v2'
+
+    def __init__(self, dataset='HabitatPerspective_Arrow', nsamples=None, **kwargs):
+        self.nsamples = nsamples
+        super().__init__(dataset=dataset, **kwargs)
+
+    @classmethod
+    def supported_datasets(cls):
+        return ['HabitatPerspective_Arrow']
+
+    def evaluate(self, eval_file, **judge_kwargs):
+        """Custom evaluate that computes Overall as unweighted average of category accuracies."""
+        import numpy as np
+        from ..smp import load, dump
+
+        suffix = eval_file.split('.')[-1]
+        result_file = eval_file.replace(f'.{suffix}', f'_result.{suffix}')
+
+        data = load(eval_file)
+
+        if 'hit' not in data.columns:
+            for i in range(len(data)):
+                item = data.iloc[i]
+                pred = str(item.get('prediction', ''))
+                gt = str(item.get('answer', ''))
+                hit = 1 if pred.strip().upper() == gt.strip().upper() else 0
+                if hit == 0 and gt.strip().upper() in pred.strip().upper():
+                    hit = 1
+                data.loc[data.index[i], 'hit'] = hit
+            dump(data, result_file)
+
+        category_acc = {}
+        categories = data['category'].unique()
+
+        for cat in categories:
+            cat_data = data[data['category'] == cat]
+            acc = cat_data['hit'].mean() * 100
+            category_acc[cat] = acc
+
+        overall_acc = np.mean(list(category_acc.values()))
+
+        res = {'Category': ['Overall'], 'Accuracy': [overall_acc], 'Count': [len(data)]}
+        for cat in sorted(categories):
+            cat_count = len(data[data['category'] == cat])
+            res['Category'].append(cat)
+            res['Accuracy'].append(category_acc[cat])
+            res['Count'].append(cat_count)
+
+        res_df = pd.DataFrame(res)
+        score_file = eval_file.replace(f'.{suffix}', '_acc.csv')
+        dump(res_df, score_file)
+
+        return res_df
+
+    def load_data(self, dataset):
+        from datasets import load_dataset
+
+        hf_ds = load_dataset(self.HF_REPO)
+
+        records = []
+        global_idx = 0
+        for split_name in hf_ds.keys():
+            for ex in hf_ds[split_name]:
+                img_b64 = pil_to_base64(ex['marked_image_with_arrow'])
+
+                choices_raw = ex['answer_choices']
+                if isinstance(choices_raw, str):
+                    choices = json.loads(choices_raw)
+                else:
+                    choices = choices_raw
+
+                records.append({
+                    'index': global_idx,
+                    'image': img_b64,
+                    'question': ex['question_with_arrow'],
+                    'A': choices[0] if len(choices) > 0 else '',
+                    'B': choices[1] if len(choices) > 1 else '',
+                    'answer': ex['answer'],
+                    'category': split_name,
                 })
                 global_idx += 1
 
@@ -364,6 +591,220 @@ class SideviewOverfit(ImageMCQDataset):
                     'answer': expected_text,  # Expected output for reference
                 })
                 samples_loaded += 1
+
+        return pd.DataFrame(records)
+
+
+class AI2ThorPathTracing2Point(ImageMCQDataset):
+    """
+    AI2Thor Path Tracing 2-Point Dataset.
+    Source: linjieli222/ai2thor_path_tracing_2point_tifa_filtered_eval
+    Supports 8 subsets (view configurations) and optional sideview image.
+    4-choice MCQ (A/B/C/D).
+    """
+
+    TYPE = 'MCQ'
+    HF_REPO = 'linjieli222/ai2thor_path_tracing_2point_tifa_filtered_eval'
+    SUBSETS = [
+        'dh_midpoint', 'td_ego_dir', 'td_ego_dir_arrow', 'td_ego_side',
+        'td_ego_side_arrow', 'td_midpoint', 'td_path', 'td_path_arrow',
+    ]
+
+    def __init__(self, dataset='AI2ThorPathTracing2Point', subset='td_path',
+                 use_sideview=False, nsamples=None, **kwargs):
+        self.subset = subset
+        self.use_sideview = use_sideview
+        self.nsamples = nsamples
+        super().__init__(dataset=dataset, **kwargs)
+
+    @classmethod
+    def supported_datasets(cls):
+        return [
+            'AI2ThorPathTracing2Point',
+            'AI2ThorPT2P_dh_midpoint', 'AI2ThorPT2P_dh_midpoint_sideview',
+            'AI2ThorPT2P_td_ego_dir', 'AI2ThorPT2P_td_ego_dir_sideview',
+            'AI2ThorPT2P_td_ego_dir_arrow', 'AI2ThorPT2P_td_ego_dir_arrow_sideview',
+            'AI2ThorPT2P_td_ego_side', 'AI2ThorPT2P_td_ego_side_sideview',
+            'AI2ThorPT2P_td_ego_side_arrow', 'AI2ThorPT2P_td_ego_side_arrow_sideview',
+            'AI2ThorPT2P_td_midpoint', 'AI2ThorPT2P_td_midpoint_sideview',
+            'AI2ThorPT2P_td_path', 'AI2ThorPT2P_td_path_sideview',
+            'AI2ThorPT2P_td_path_arrow', 'AI2ThorPT2P_td_path_arrow_sideview',
+        ]
+
+    def build_prompt(self, line):
+        """Build prompt with images interleaved at <image_N> positions in the question text."""
+        import re
+        import string
+
+        if isinstance(line, int):
+            line = self.data.iloc[line]
+
+        if self.meta_only:
+            from ..smp import toliststr
+            tgt_path = toliststr(line['image_path'])
+        else:
+            tgt_path = self.dump_image(line)
+
+        # Ensure tgt_path is a list
+        if not isinstance(tgt_path, list):
+            tgt_path = [tgt_path]
+
+        question = line['question']
+
+        # Build options text
+        options = {
+            cand: line[cand]
+            for cand in string.ascii_uppercase
+            if cand in line and not pd.isna(line[cand])
+        }
+        options_prompt = ''
+        if len(options):
+            options_prompt = 'Options:\n'
+            for key, item in options.items():
+                options_prompt += f'{key}. {item}\n'
+            options_prompt += 'Please select the correct answer from the options above. \n'
+
+        # Split question at <image_N> tags and interleave with actual images
+        # Images are ordered: image_1 → tgt_path[0], image_2 → tgt_path[1], etc.
+        parts = re.split(r'(<image_\d+>)', question)
+
+        msgs = []
+        for part in parts:
+            m = re.match(r'<image_(\d+)>', part)
+            if m:
+                img_idx = int(m.group(1)) - 1  # <image_1> → index 0
+                if img_idx < len(tgt_path):
+                    msgs.append(dict(type='image', value=tgt_path[img_idx]))
+            else:
+                text = part.strip()
+                if text:
+                    msgs.append(dict(type='text', value=text))
+
+        # Append options at the end
+        if options_prompt:
+            msgs.append(dict(type='text', value=options_prompt))
+
+        return msgs
+
+    @staticmethod
+    def _extract_answer(pred):
+        """Extract answer letter from model prediction, handling <answer> tags."""
+        import re
+        pred = str(pred).strip()
+        # Try to extract from <answer>...</answer> tags
+        match = re.search(r'<answer>\s*([A-Da-d])\s*</answer>', pred)
+        if match:
+            return match.group(1).upper()
+        # Try to extract from <answer>...(A)...</answer> or answer tag with text
+        match = re.search(r'<answer>\s*\(?([A-Da-d])\)?\s*', pred)
+        if match:
+            return match.group(1).upper()
+        # Fallback: exact single letter
+        if pred.upper() in ('A', 'B', 'C', 'D'):
+            return pred.upper()
+        # Fallback: first letter match in the prediction
+        match = re.search(r'\b([A-D])\b', pred)
+        if match:
+            return match.group(1)
+        return pred.strip().upper()
+
+    def evaluate(self, eval_file, **judge_kwargs):
+        """Custom evaluate that computes accuracy for this subset."""
+        import numpy as np
+        from ..smp import load, dump
+
+        suffix = eval_file.split('.')[-1]
+        result_file = eval_file.replace(f'.{suffix}', f'_result.{suffix}')
+
+        data = load(eval_file)
+
+        # Score each sample
+        if 'hit' not in data.columns:
+            for i in range(len(data)):
+                item = data.iloc[i]
+                pred = self._extract_answer(item.get('prediction', ''))
+                gt = str(item.get('answer', '')).strip().upper()
+                hit = 1 if pred == gt else 0
+                data.loc[data.index[i], 'hit'] = hit
+            dump(data, result_file)
+
+        overall_acc = data['hit'].mean() * 100
+
+        res = {
+            'Category': ['Overall'],
+            'Accuracy': [overall_acc],
+            'Count': [len(data)],
+        }
+
+        # Per-category breakdown if category column exists
+        if 'category' in data.columns:
+            categories = data['category'].unique()
+            for cat in sorted(categories):
+                cat_data = data[data['category'] == cat]
+                cat_acc = cat_data['hit'].mean() * 100
+                res['Category'].append(cat)
+                res['Accuracy'].append(cat_acc)
+                res['Count'].append(len(cat_data))
+
+        res_df = pd.DataFrame(res)
+        score_file = eval_file.replace(f'.{suffix}', '_acc.csv')
+        dump(res_df, score_file)
+
+        return res_df
+
+    @staticmethod
+    def _sideview_desc_to_second_person(desc):
+        """Convert sideview_desc from first person to second person."""
+        import re
+        desc = re.sub(r'\bI\b', 'You', desc)
+        desc = re.sub(r'\bmy\b', 'your', desc)
+        desc = re.sub(r'\bMy\b', 'Your', desc)
+        desc = re.sub(r'\bme\b', 'you', desc)
+        return desc
+
+    def load_data(self, dataset):
+        from datasets import load_dataset
+
+        hf_ds = load_dataset(self.HF_REPO, self.subset, split='val')
+
+        records = []
+        for idx, ex in enumerate(hf_ds):
+            if self.nsamples is not None and len(records) >= self.nsamples:
+                break
+
+            # Build image list: topdown + ego images (if any) + sideview (if enabled)
+            img_list = [pil_to_base64(ex['topdown_image'])]
+            for ego_img in (ex.get('ego_images') or []):
+                img_list.append(pil_to_base64(ego_img))
+
+            question = ex['question']
+
+            if self.use_sideview:
+                sv_img = ex.get('sideview_image') or ex.get('sideview_images')
+                sideview_b64 = pil_to_base64(sv_img)
+                img_list.append(sideview_b64)
+                # Append sideview description (converted to second person)
+                sv_desc = ex.get('sideview_desc', '')
+                if sv_desc:
+                    sv_desc = self._sideview_desc_to_second_person(sv_desc)
+                    question = question + ' ' + sv_desc
+
+            # Single image → string, multiple images → list
+            img = img_list if len(img_list) > 1 else img_list[0]
+
+            # Map choices list to A/B/C/D
+            choices = ex['choices']
+
+            records.append({
+                'index': len(records),
+                'image': img,
+                'question': question,
+                'A': choices[0] if len(choices) > 0 else '',
+                'B': choices[1] if len(choices) > 1 else '',
+                'C': choices[2] if len(choices) > 2 else '',
+                'D': choices[3] if len(choices) > 3 else '',
+                'answer': ex['answer'],
+            })
 
         return pd.DataFrame(records)
 
