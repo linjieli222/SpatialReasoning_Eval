@@ -28,9 +28,13 @@ class ThinkMorph(BaseModel):
     INSTALL_REQ = False
     INTERLEAVE = True
 
-    def __init__(self, model_path='ThinkMorph/ThinkMorph-7B', think=True, understanding_output=True, save_dir=None, temperature=0.3, max_think_token_n=4096, num_timesteps=50, image_resolution=1024, visual_gen=True, **kwargs):
+    def __init__(self, model_path='ThinkMorph/ThinkMorph-7B', think=True, understanding_output=True, save_dir=None, temperature=0.3, max_think_token_n=4096, num_timesteps=50, image_resolution=1024, output_image_resolution=None, visual_gen=True, **kwargs):
         # self.check_install()
         assert model_path is not None
+        # If model_path looks like an HF repo ID (not a local dir), download via huggingface_hub
+        if not os.path.isdir(model_path) and '/' in model_path:
+            from huggingface_hub import snapshot_download
+            model_path = snapshot_download(repo_id=model_path)
         if not understanding_output:
             assert save_dir is not None
         self.model_path = model_path
@@ -41,6 +45,11 @@ class ThinkMorph(BaseModel):
         self.max_think_token_n = max_think_token_n
         self.num_timesteps = num_timesteps
         self.image_resolution = image_resolution
+        # output_image_resolution controls generated image size independently from
+        # the input VAE transform (image_resolution). This is needed when training
+        # uses different output latent sizes (e.g., l32=512, l16=256) while keeping
+        # input images at 1024x1024.
+        self.output_image_resolution = output_image_resolution if output_image_resolution is not None else image_resolution
         self.visual_gen = visual_gen
 
         if save_dir is not None:
@@ -56,6 +65,20 @@ class ThinkMorph(BaseModel):
         vit_config.num_hidden_layers = vit_config.num_hidden_layers - 1
 
         vae_model, vae_config = load_ae(local_path=os.path.join(model_path, "ae.safetensors"))
+
+        # Auto-detect visual_gen from checkpoint: if the checkpoint lacks visual
+        # generation weights (e.g., time_embedder), override to False.
+        if visual_gen:
+            from safetensors import safe_open
+            single_ckpt = os.path.join(model_path, "model.safetensors")
+            ema_ckpt = os.path.join(model_path, "ema.safetensors")
+            ckpt_to_probe = single_ckpt if os.path.exists(single_ckpt) else ema_ckpt
+            if os.path.exists(ckpt_to_probe):
+                with safe_open(ckpt_to_probe, framework="pt") as f:
+                    if "time_embedder.mlp.0.weight" not in f.keys():
+                        visual_gen = False
+                        self.visual_gen = False
+                        print(f"Auto-detected visual_gen=False (checkpoint lacks visual gen weights)")
 
         config = BagelConfig(
             visual_gen=visual_gen,
@@ -85,7 +108,7 @@ class ThinkMorph(BaseModel):
         vit_transform = ImageTransform(980, 224, 14)
 
         # device map
-        max_mem_per_gpu = "40GiB"
+        max_mem_per_gpu = "120GiB"
         device_map = infer_auto_device_map(
             model,
             max_memory={i: max_mem_per_gpu for i in range(torch.cuda.device_count())},
@@ -135,6 +158,8 @@ class ThinkMorph(BaseModel):
         # Load checkpoint
         import logging
         logging.getLogger("accelerate.utils.modeling").setLevel(logging.WARNING)
+        offload_dir = os.path.join(os.environ.get("TMPDIR", "/tmp"), "offload")
+        os.makedirs(offload_dir, exist_ok=True)
         model = load_checkpoint_and_dispatch(
             model,
             checkpoint=checkpoint,
@@ -142,7 +167,7 @@ class ThinkMorph(BaseModel):
             offload_buffers=True,
             dtype=torch.bfloat16,
             force_hooks=True,
-            offload_folder="/tmp/offload"
+            offload_folder=offload_dir
         )
         model = model.eval()
         print(f'Model loaded successfully')
@@ -189,7 +214,7 @@ class ThinkMorph(BaseModel):
                 cfg_renorm_min=0.0,
                 cfg_renorm_type="text_channel",
                 max_rounds=1,  # Generate one intermediate thought image
-                image_shapes=(self.image_resolution, self.image_resolution),
+                image_shapes=(self.output_image_resolution, self.output_image_resolution),
             )
 
         self.inference_hyper = inference_hyper
