@@ -208,9 +208,30 @@ dream_1k_dataset = {
 
 # AI2Thor spatial reasoning datasets with sample limits
 ai2thor_dataset = {
+    'AI2ThorPathTracing': partial(AI2ThorPathTracing, dataset='AI2ThorPathTracing'),
+    'AI2ThorPathTracing_sideview': partial(AI2ThorPathTracing, dataset='AI2ThorPathTracing_sideview', use_sideview=True),
     'AI2ThorPathTracing_10': partial(AI2ThorPathTracing, dataset='AI2ThorPathTracing', nsamples=10),
+    'AI2ThorPerspective_NoArrow': partial(AI2ThorPerspective_NoArrow, dataset='AI2ThorPerspective_NoArrow'),
     'AI2ThorPerspective_NoArrow_10': partial(AI2ThorPerspective_NoArrow, dataset='AI2ThorPerspective_NoArrow', nsamples=10),
+    'AI2ThorPerspective_Arrow': partial(AI2ThorPerspective_Arrow, dataset='AI2ThorPerspective_Arrow'),
     'SideviewOverfit_10': partial(SideviewOverfit, dataset='SideviewOverfit', nsamples=10),
+    # Path Tracing 2-Point: 8 subsets x 2 (with/without sideview) = 16 entries
+    'AI2ThorPT2P_dh_midpoint': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_dh_midpoint', subset='dh_midpoint', use_sideview=False),
+    'AI2ThorPT2P_dh_midpoint_sideview': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_dh_midpoint_sideview', subset='dh_midpoint', use_sideview=True),
+    'AI2ThorPT2P_td_ego_dir': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_td_ego_dir', subset='td_ego_dir', use_sideview=False),
+    'AI2ThorPT2P_td_ego_dir_sideview': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_td_ego_dir_sideview', subset='td_ego_dir', use_sideview=True),
+    'AI2ThorPT2P_td_ego_dir_arrow': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_td_ego_dir_arrow', subset='td_ego_dir_arrow', use_sideview=False),
+    'AI2ThorPT2P_td_ego_dir_arrow_sideview': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_td_ego_dir_arrow_sideview', subset='td_ego_dir_arrow', use_sideview=True),
+    'AI2ThorPT2P_td_ego_side': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_td_ego_side', subset='td_ego_side', use_sideview=False),
+    'AI2ThorPT2P_td_ego_side_sideview': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_td_ego_side_sideview', subset='td_ego_side', use_sideview=True),
+    'AI2ThorPT2P_td_ego_side_arrow': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_td_ego_side_arrow', subset='td_ego_side_arrow', use_sideview=False),
+    'AI2ThorPT2P_td_ego_side_arrow_sideview': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_td_ego_side_arrow_sideview', subset='td_ego_side_arrow', use_sideview=True),
+    'AI2ThorPT2P_td_midpoint': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_td_midpoint', subset='td_midpoint', use_sideview=False),
+    'AI2ThorPT2P_td_midpoint_sideview': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_td_midpoint_sideview', subset='td_midpoint', use_sideview=True),
+    'AI2ThorPT2P_td_path': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_td_path', subset='td_path', use_sideview=False),
+    'AI2ThorPT2P_td_path_sideview': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_td_path_sideview', subset='td_path', use_sideview=True),
+    'AI2ThorPT2P_td_path_arrow': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_td_path_arrow', subset='td_path_arrow', use_sideview=False),
+    'AI2ThorPT2P_td_path_arrow_sideview': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_td_path_arrow_sideview', subset='td_path_arrow', use_sideview=True),
 }
 
 # SAT Circular dataset with sample limits
