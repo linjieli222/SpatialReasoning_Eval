@@ -238,6 +238,7 @@ class InterleaveInferencer:
         cfg_img_context = deepcopy(gen_context)
 
         with torch.autocast(device_type="cuda", enabled=True, dtype=torch.bfloat16):
+            # Always add system prompt - all models are trained with it
             if think:
                 if understanding_output:
                     system_prompt = VLM_THINK_SYSTEM_PROMPT

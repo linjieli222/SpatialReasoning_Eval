@@ -1,0 +1,127 @@
+________________________________________________________________________________
+Miniforge (conda) has been loaded.
+
+WARNING: Login nodes are CPU ONLY. Install pkgs with GPU support on compute
+nodes.
+
+- Please create and work in your own conda environments:
+    conda create -n myenv python=3.11
+    conda activate myenv
+
+- To customize environment or package locations, edit your ~/.condarc:
+    envs_dirs:
+      - /path/to/your/envs
+    pkgs_dirs:
+      - /path/to/your/pkgs
+
+  For more information, see:
+    https://docs.conda.io/projects/conda/en/latest/configuration.html
+
+- If your personal Conda stops working after unloading this module, try:
+    source ~/.bashrc
+________________________________________________________________________________
+
+W0217 13:53:49.734000 2572821 site-packages/torch/distributed/run.py:793] 
+W0217 13:53:49.734000 2572821 site-packages/torch/distributed/run.py:793] *****************************************
+W0217 13:53:49.734000 2572821 site-packages/torch/distributed/run.py:793] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0217 13:53:49.734000 2572821 site-packages/torch/distributed/run.py:793] *****************************************
+RANK: 0, LOCAL_RANK: 0, WORLD_SIZE: 2,LOCAL_WORLD_SIZE: 2, CUDA_VISIBLE_DEVICES: 0
+RANK: 1, LOCAL_RANK: 1, WORLD_SIZE: 2,LOCAL_WORLD_SIZE: 2, CUDA_VISIBLE_DEVICES: 1
+[2026-02-17 13:53:51] ERROR - misc.py: load_env - 215: Did not detect the .env file at /gpfs/home/linjli/source/SpatialReasoning_Eval/.env, failed to load. 
+[2026-02-17 13:53:51] ERROR - misc.py: load_env - 215: Did not detect the .env file at /gpfs/home/linjli/source/SpatialReasoning_Eval/.env, failed to load. 
+Please install pyav to use video processing functions.
+Please install pyav to use video processing functions.
+[2026-02-17 13:53:59] ERROR - misc.py: load_env - 215: Did not detect the .env file at /gpfs/home/linjli/source/SpatialReasoning_Eval/.env, failed to load. 
+[2026-02-17 13:53:59] ERROR - misc.py: load_env - 215: Did not detect the .env file at /gpfs/home/linjli/source/SpatialReasoning_Eval/.env, failed to load. 
+[2026-02-17 13:53:59] WARNING - RUN - run.py: main - 217: --reuse is not set, will not reuse previous (before one day) temporary files
+[rank1]:[W217 13:54:00.126009786 ProcessGroupNCCL.cpp:4115] [PG ID 0 PG GUID 0 Rank 1]  using GPU 0 to perform barrier as devices used by this process are currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect.Specify device_ids in barrier() to force use of a particular device,or call init_process_group() with a device_id.
+[rank0]:[W217 13:54:00.135671186 ProcessGroupNCCL.cpp:4115] [PG ID 0 PG GUID 0 Rank 0]  using GPU 0 to perform barrier as devices used by this process are currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect.Specify device_ids in barrier() to force use of a particular device,or call init_process_group() with a device_id.
+[2026-02-17 14:04:54] WARNING - modeling.py: load_state_dict - 1637: The safetensors archive passed at /gpfs/projects/krishna/hf_cache/BAGEL-7B-MoT/ema.safetensors does not contain metadata. Make sure to save your model with the `save_pretrained` method. Defaulting to 'pt' metadata.
+  0%|          | 0/1223 [00:00<?, ?w/s]language_model.model.embed_tokens.weight:   0%|          | 0/1223 [00:00<?, ?w/s, dev=cuda:0][2026-02-17 14:04:54] WARNING - modeling.py: load_state_dict - 1637: The safetensors archive passed at /gpfs/projects/krishna/hf_cache/BAGEL-7B-MoT/ema.safetensors does not contain metadata. Make sure to save your model with the `save_pretrained` method. Defaulting to 'pt' metadata.
+  0%|          | 0/1223 [00:00<?, ?w/s]language_model.model.embed_tokens.weight:   0%|          | 0/1223 [00:00<?, ?w/s, dev=cuda:0]--- Logging error ---
+--- Logging error ---
+Traceback (most recent call last):
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/run.py", line 340, in main
+    model = infer_data_job(
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/inference.py", line 211, in infer_data_job
+    model = infer_data(
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/inference.py", line 124, in infer_data
+    model = supported_VLM[model_name](**kwargs) if isinstance(model, str) else model
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/vlm/ThinkMorph.py", line 140, in __init__
+    model = load_checkpoint_and_dispatch(
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/accelerate/big_modeling.py", line 628, in load_checkpoint_and_dispatch
+    load_checkpoint_in_model(
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/accelerate/utils/modeling.py", line 1960, in load_checkpoint_in_model
+    loaded_checkpoint = load_state_dict(checkpoint_file, device_map=device_map)
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/accelerate/utils/modeling.py", line 1706, in load_state_dict
+    progress_bar.update()
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/tqdm/std.py", line 1242, in update
+    self.refresh(lock_args=self.lock_args)
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/tqdm/std.py", line 1347, in refresh
+    self.display()
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/tqdm/std.py", line 1495, in display
+    self.sp(self.__str__() if msg is None else msg)
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/tqdm/std.py", line 459, in print_status
+    fp_write('\r' + s + (' ' * max(last_len[0] - len_s, 0)))
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/tqdm/std.py", line 452, in fp_write
+    fp.write(str(s))
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/tqdm/utils.py", line 196, in inner
+    return func(*args, **kwargs)
+OSError: [Errno 122] Disk quota exceeded
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/logging/__init__.py", line 1103, in emit
+    stream.write(msg + self.terminator)
+OSError: [Errno 122] Disk quota exceeded
+Call stack:
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/run.py", line 506, in <module>
+    main()
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/run.py", line 496, in main
+    logger.exception(f'Model {model_name} x Dataset {dataset_name} combination failed: {e}, '
+Message: 'Model bagel_mot x Dataset AI2ThorPT2P_td_path_arrow_sideview combination failed: [Errno 122] Disk quota exceeded, skipping this combination.'
+Arguments: ()
+                                                                                             Traceback (most recent call last):
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/run.py", line 340, in main
+    model = infer_data_job(
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/inference.py", line 211, in infer_data_job
+    model = infer_data(
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/inference.py", line 124, in infer_data
+    model = supported_VLM[model_name](**kwargs) if isinstance(model, str) else model
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/vlm/ThinkMorph.py", line 140, in __init__
+    model = load_checkpoint_and_dispatch(
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/accelerate/big_modeling.py", line 628, in load_checkpoint_and_dispatch
+    load_checkpoint_in_model(
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/accelerate/utils/modeling.py", line 1960, in load_checkpoint_in_model
+    loaded_checkpoint = load_state_dict(checkpoint_file, device_map=device_map)
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/accelerate/utils/modeling.py", line 1706, in load_state_dict
+    progress_bar.update()
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/tqdm/std.py", line 1242, in update
+    self.refresh(lock_args=self.lock_args)
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/tqdm/std.py", line 1347, in refresh
+    self.display()
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/tqdm/std.py", line 1495, in display
+    self.sp(self.__str__() if msg is None else msg)
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/tqdm/std.py", line 459, in print_status
+    fp_write('\r' + s + (' ' * max(last_len[0] - len_s, 0)))
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/tqdm/std.py", line 452, in fp_write
+    fp.write(str(s))
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/tqdm/utils.py", line 196, in inner
+    return func(*args, **kwargs)
+OSError: [Errno 122] Disk quota exceeded
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/logging/__init__.py", line 1103, in emit
+    stream.write(msg + self.terminator)
+OSError: [Errno 122] Disk quota exceeded
+Call stack:
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/run.py", line 506, in <module>
+    main()
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/run.py", line 496, in main
+    logger.exception(f'Model {model_name} x Dataset {dataset_name} combination failed: {e}, '
+Message: 'Model bagel_mot x Dataset AI2ThorPT2P_td_path_arrow_sideview combination failed: [Errno 122] Disk quota exceeded, skipping this combination.'
+Arguments: ()
+                                                                                             

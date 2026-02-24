@@ -1,0 +1,56 @@
+________________________________________________________________________________
+Miniforge (conda) has been loaded.
+
+WARNING: Login nodes are CPU ONLY. Install pkgs with GPU support on compute
+nodes.
+
+- Please create and work in your own conda environments:
+    conda create -n myenv python=3.11
+    conda activate myenv
+
+- To customize environment or package locations, edit your ~/.condarc:
+    envs_dirs:
+      - /path/to/your/envs
+    pkgs_dirs:
+      - /path/to/your/pkgs
+
+  For more information, see:
+    https://docs.conda.io/projects/conda/en/latest/configuration.html
+
+- If your personal Conda stops working after unloading this module, try:
+    source ~/.bashrc
+________________________________________________________________________________
+
+W0217 13:53:49.836000 2705019 site-packages/torch/distributed/run.py:793] 
+W0217 13:53:49.836000 2705019 site-packages/torch/distributed/run.py:793] *****************************************
+W0217 13:53:49.836000 2705019 site-packages/torch/distributed/run.py:793] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0217 13:53:49.836000 2705019 site-packages/torch/distributed/run.py:793] *****************************************
+RANK: 1, LOCAL_RANK: 1, WORLD_SIZE: 2,LOCAL_WORLD_SIZE: 2, CUDA_VISIBLE_DEVICES: 1
+RANK: 0, LOCAL_RANK: 0, WORLD_SIZE: 2,LOCAL_WORLD_SIZE: 2, CUDA_VISIBLE_DEVICES: 0
+[2026-02-17 13:53:52] ERROR - misc.py: load_env - 215: Did not detect the .env file at /gpfs/home/linjli/source/SpatialReasoning_Eval/.env, failed to load. 
+[2026-02-17 13:53:52] ERROR - misc.py: load_env - 215: Did not detect the .env file at /gpfs/home/linjli/source/SpatialReasoning_Eval/.env, failed to load. 
+Please install pyav to use video processing functions.
+Please install pyav to use video processing functions.
+[2026-02-17 13:54:01] ERROR - misc.py: load_env - 215: Did not detect the .env file at /gpfs/home/linjli/source/SpatialReasoning_Eval/.env, failed to load. 
+[2026-02-17 13:54:01] WARNING - RUN - run.py: main - 217: --reuse is not set, will not reuse previous (before one day) temporary files
+[rank0]:[W217 13:54:01.089294659 ProcessGroupNCCL.cpp:4115] [PG ID 0 PG GUID 0 Rank 0]  using GPU 0 to perform barrier as devices used by this process are currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect.Specify device_ids in barrier() to force use of a particular device,or call init_process_group() with a device_id.
+[2026-02-17 13:54:01] ERROR - misc.py: load_env - 215: Did not detect the .env file at /gpfs/home/linjli/source/SpatialReasoning_Eval/.env, failed to load. 
+[rank1]:[W217 13:54:02.262595471 ProcessGroupNCCL.cpp:4115] [PG ID 0 PG GUID 0 Rank 1]  using GPU 0 to perform barrier as devices used by this process are currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect.Specify device_ids in barrier() to force use of a particular device,or call init_process_group() with a device_id.
+--- Logging error ---
+Traceback (most recent call last):
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/run.py", line 340, in main
+    model = infer_data_job(
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/inference.py", line 211, in infer_data_job
+    model = infer_data(
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/inference.py", line 88, in infer_data
+    res.update(load(out_file))
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/smp/file.py", line 272, in load
+    return handlers[suffix](f)
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/smp/file.py", line 238, in load_pkl
+    return pickle.load(open(pth, 'rb'))
+EOFError: Ran out of input
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+--- Logging error ---

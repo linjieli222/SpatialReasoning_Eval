@@ -1,0 +1,41 @@
+________________________________________________________________________________
+Miniforge (conda) has been loaded.
+
+WARNING: Login nodes are CPU ONLY. Install pkgs with GPU support on compute
+nodes.
+
+- Please create and work in your own conda environments:
+    conda create -n myenv python=3.11
+    conda activate myenv
+
+- To customize environment or package locations, edit your ~/.condarc:
+    envs_dirs:
+      - /path/to/your/envs
+    pkgs_dirs:
+      - /path/to/your/pkgs
+
+  For more information, see:
+    https://docs.conda.io/projects/conda/en/latest/configuration.html
+
+- If your personal Conda stops working after unloading this module, try:
+    source ~/.bashrc
+________________________________________________________________________________
+
+W0217 13:53:49.096000 1518757 site-packages/torch/distributed/run.py:793] 
+W0217 13:53:49.096000 1518757 site-packages/torch/distributed/run.py:793] *****************************************
+W0217 13:53:49.096000 1518757 site-packages/torch/distributed/run.py:793] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0217 13:53:49.096000 1518757 site-packages/torch/distributed/run.py:793] *****************************************
+RANK: 0, LOCAL_RANK: 0, WORLD_SIZE: 2,LOCAL_WORLD_SIZE: 2, CUDA_VISIBLE_DEVICES: 0RANK: 1, LOCAL_RANK: 1, WORLD_SIZE: 2,LOCAL_WORLD_SIZE: 2, CUDA_VISIBLE_DEVICES: 1
+
+[2026-02-17 13:53:51] ERROR - misc.py: load_env - 215: Did not detect the .env file at /gpfs/home/linjli/source/SpatialReasoning_Eval/.env, failed to load. 
+[2026-02-17 13:53:51] ERROR - misc.py: load_env - 215: Did not detect the .env file at /gpfs/home/linjli/source/SpatialReasoning_Eval/.env, failed to load. 
+Please install pyav to use video processing functions.
+Please install pyav to use video processing functions.
+[2026-02-17 13:53:59] ERROR - misc.py: load_env - 215: Did not detect the .env file at /gpfs/home/linjli/source/SpatialReasoning_Eval/.env, failed to load. 
+[2026-02-17 13:53:59] WARNING - RUN - run.py: main - 217: --reuse is not set, will not reuse previous (before one day) temporary files
+[2026-02-17 13:53:59] ERROR - misc.py: load_env - 215: Did not detect the .env file at /gpfs/home/linjli/source/SpatialReasoning_Eval/.env, failed to load. 
+[rank0]:[W217 13:53:59.461634974 ProcessGroupNCCL.cpp:4115] [PG ID 0 PG GUID 0 Rank 0]  using GPU 0 to perform barrier as devices used by this process are currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect.Specify device_ids in barrier() to force use of a particular device,or call init_process_group() with a device_id.
+[rank1]:[W217 13:53:59.464468043 ProcessGroupNCCL.cpp:4115] [PG ID 0 PG GUID 0 Rank 1]  using GPU 0 to perform barrier as devices used by this process are currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect.Specify device_ids in barrier() to force use of a particular device,or call init_process_group() with a device_id.
+[2026-02-17 13:56:32] WARNING - modeling.py: load_state_dict - 1637: The safetensors archive passed at /gpfs/projects/krishna/hf_cache/BAGEL-7B-MoT/ema.safetensors does not contain metadata. Make sure to save your model with the `save_pretrained` method. Defaulting to 'pt' metadata.
+[2026-02-17 13:56:32] WARNING - modeling.py: load_state_dict - 1637: The safetensors archive passed at /gpfs/projects/krishna/hf_cache/BAGEL-7B-MoT/ema.safetensors does not contain metadata. Make sure to save your model with the `save_pretrained` method. Defaulting to 'pt' metadata.
+  0%|          | 0/1223 [00:00<?, ?w/s]language_model.model.embed_tokens.weight:   0%|          | 0/1223 [00:00<?, ?w/s, dev=cuda:0]  0%|          | 0/1223 [00:00<?, ?w/s]language_model.model.embed_tokens.weight:   0%|          | 0/1223 [00:00<?, ?w/s, dev=cuda:0]

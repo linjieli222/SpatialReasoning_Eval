@@ -1,0 +1,112 @@
+________________________________________________________________________________
+Miniforge (conda) has been loaded.
+
+WARNING: Login nodes are CPU ONLY. Install pkgs with GPU support on compute
+nodes.
+
+- Please create and work in your own conda environments:
+    conda create -n myenv python=3.11
+    conda activate myenv
+
+- To customize environment or package locations, edit your ~/.condarc:
+    envs_dirs:
+      - /path/to/your/envs
+    pkgs_dirs:
+      - /path/to/your/pkgs
+
+  For more information, see:
+    https://docs.conda.io/projects/conda/en/latest/configuration.html
+
+- If your personal Conda stops working after unloading this module, try:
+    source ~/.bashrc
+________________________________________________________________________________
+
+W0217 01:03:33.482000 3285830 site-packages/torch/distributed/run.py:793] 
+W0217 01:03:33.482000 3285830 site-packages/torch/distributed/run.py:793] *****************************************
+W0217 01:03:33.482000 3285830 site-packages/torch/distributed/run.py:793] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0217 01:03:33.482000 3285830 site-packages/torch/distributed/run.py:793] *****************************************
+RANK: 0, LOCAL_RANK: 0, WORLD_SIZE: 2,LOCAL_WORLD_SIZE: 2, CUDA_VISIBLE_DEVICES: 0
+RANK: 1, LOCAL_RANK: 1, WORLD_SIZE: 2,LOCAL_WORLD_SIZE: 2, CUDA_VISIBLE_DEVICES: 1
+[2026-02-17 01:04:01] ERROR - misc.py: load_env - 215: Did not detect the .env file at /gpfs/home/linjli/source/SpatialReasoning_Eval/.env, failed to load. 
+[2026-02-17 01:04:01] ERROR - misc.py: load_env - 215: Did not detect the .env file at /gpfs/home/linjli/source/SpatialReasoning_Eval/.env, failed to load. 
+Please install pyav to use video processing functions.
+Please install pyav to use video processing functions.
+Traceback (most recent call last):
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/run.py", line 42, in <module>
+    from vlmeval.config import supported_VLM
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/__init__.py", line 13, in <module>
+    from .api import *
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/api/__init__.py", line 4, in <module>
+    from .qwen_vl_api import QwenVLWrapper, QwenVLAPI, Qwen2VLAPI
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/api/qwen_vl_api.py", line 8, in <module>
+    from vlmeval.vlm.qwen2_vl.prompt import Qwen2VLPromptMixin
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/vlm/__init__.py", line 120, in <module>
+    from .ThinkMorph import ThinkMorph
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/vlm/ThinkMorph.py", line 9, in <module>
+    from .thinkmorph import (
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/vlm/thinkmorph/__init__.py", line 3, in <module>
+    from .modeling.bagel import (
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/vlm/thinkmorph/modeling/__init__.py", line 4, in <module>
+    from . import bagel, qwen2, siglip, autoencoder
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/vlm/thinkmorph/modeling/bagel/__init__.py", line 5, in <module>
+    from .bagel import BagelConfig, Bagel
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/vlm/thinkmorph/modeling/bagel/bagel.py", line 20, in <module>
+    from .qwen2_navit import NaiveCache
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/vlm/thinkmorph/modeling/bagel/qwen2_navit.py", line 24, in <module>
+    from flash_attn import flash_attn_varlen_func
+ModuleNotFoundError: No module named 'flash_attn'
+Traceback (most recent call last):
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/run.py", line 42, in <module>
+    from vlmeval.config import supported_VLM
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/__init__.py", line 13, in <module>
+    from .api import *
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/api/__init__.py", line 4, in <module>
+    from .qwen_vl_api import QwenVLWrapper, QwenVLAPI, Qwen2VLAPI
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/api/qwen_vl_api.py", line 8, in <module>
+    from vlmeval.vlm.qwen2_vl.prompt import Qwen2VLPromptMixin
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/vlm/__init__.py", line 120, in <module>
+    from .ThinkMorph import ThinkMorph
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/vlm/ThinkMorph.py", line 9, in <module>
+    from .thinkmorph import (
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/vlm/thinkmorph/__init__.py", line 3, in <module>
+    from .modeling.bagel import (
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/vlm/thinkmorph/modeling/__init__.py", line 4, in <module>
+    from . import bagel, qwen2, siglip, autoencoder
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/vlm/thinkmorph/modeling/bagel/__init__.py", line 5, in <module>
+    from .bagel import BagelConfig, Bagel
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/vlm/thinkmorph/modeling/bagel/bagel.py", line 20, in <module>
+    from .qwen2_navit import NaiveCache
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/vlm/thinkmorph/modeling/bagel/qwen2_navit.py", line 24, in <module>
+    from flash_attn import flash_attn_varlen_func
+ModuleNotFoundError: No module named 'flash_attn'
+W0217 01:07:43.002000 3285830 site-packages/torch/distributed/elastic/multiprocessing/api.py:897] Sending process 3285968 closing signal SIGTERM
+E0217 01:07:43.034000 3285830 site-packages/torch/distributed/elastic/multiprocessing/api.py:869] failed (exitcode: 1) local_rank: 1 (pid: 3285969) of binary: /gpfs/projects/krishna/envs/thinkmorph/bin/python3.10
+Traceback (most recent call last):
+  File "/gpfs/projects/krishna/envs/thinkmorph/bin/torchrun", line 7, in <module>
+    sys.exit(main())
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 355, in wrapper
+    return f(*args, **kwargs)
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/torch/distributed/run.py", line 919, in main
+    run(args)
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/torch/distributed/run.py", line 910, in run
+    elastic_launch(
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 138, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 269, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+run.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-02-17_01:07:43
+  host      : g016.hyak.local
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 3285969)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================

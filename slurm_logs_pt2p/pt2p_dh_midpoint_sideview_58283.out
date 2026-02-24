@@ -1,0 +1,78 @@
+________________________________________________________________________________
+Miniforge (conda) has been loaded.
+
+WARNING: Login nodes are CPU ONLY. Install pkgs with GPU support on compute
+nodes.
+
+- Please create and work in your own conda environments:
+    conda create -n myenv python=3.11
+    conda activate myenv
+
+- To customize environment or package locations, edit your ~/.condarc:
+    envs_dirs:
+      - /path/to/your/envs
+    pkgs_dirs:
+      - /path/to/your/pkgs
+
+  For more information, see:
+    https://docs.conda.io/projects/conda/en/latest/configuration.html
+
+- If your personal Conda stops working after unloading this module, try:
+    source ~/.bashrc
+________________________________________________________________________________
+
+W0217 01:12:34.100000 3203305 site-packages/torch/distributed/run.py:793] 
+W0217 01:12:34.100000 3203305 site-packages/torch/distributed/run.py:793] *****************************************
+W0217 01:12:34.100000 3203305 site-packages/torch/distributed/run.py:793] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0217 01:12:34.100000 3203305 site-packages/torch/distributed/run.py:793] *****************************************
+RANK: 0, LOCAL_RANK: 0, WORLD_SIZE: 2,LOCAL_WORLD_SIZE: 2, CUDA_VISIBLE_DEVICES: 0
+RANK: 1, LOCAL_RANK: 1, WORLD_SIZE: 2,LOCAL_WORLD_SIZE: 2, CUDA_VISIBLE_DEVICES: 1
+[2026-02-17 01:12:55] ERROR - misc.py: load_env - 215: Did not detect the .env file at /gpfs/home/linjli/source/SpatialReasoning_Eval/.env, failed to load. 
+[2026-02-17 01:12:55] ERROR - misc.py: load_env - 215: Did not detect the .env file at /gpfs/home/linjli/source/SpatialReasoning_Eval/.env, failed to load. 
+Please install pyav to use video processing functions.
+Please install pyav to use video processing functions.
+[2026-02-17 01:16:08] ERROR - misc.py: load_env - 215: Did not detect the .env file at /gpfs/home/linjli/source/SpatialReasoning_Eval/.env, failed to load. 
+[2026-02-17 01:16:08] ERROR - misc.py: load_env - 215: Did not detect the .env file at /gpfs/home/linjli/source/SpatialReasoning_Eval/.env, failed to load. 
+[2026-02-17 01:16:08] WARNING - RUN - run.py: main - 217: --reuse is not set, will not reuse previous (before one day) temporary files
+[rank0]:[W217 01:16:08.807694565 ProcessGroupNCCL.cpp:4115] [PG ID 0 PG GUID 0 Rank 0]  using GPU 0 to perform barrier as devices used by this process are currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect.Specify device_ids in barrier() to force use of a particular device,or call init_process_group() with a device_id.
+[rank1]:[W217 01:16:08.807990610 ProcessGroupNCCL.cpp:4115] [PG ID 0 PG GUID 0 Rank 1]  using GPU 0 to perform barrier as devices used by this process are currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect.Specify device_ids in barrier() to force use of a particular device,or call init_process_group() with a device_id.
+[2026-02-17 01:18:37] ERROR - RUN - run.py: main - 496: Model bagel_mot x Dataset AI2ThorPT2P_dh_midpoint_sideview combination failed: [Errno 13] Permission denied: '/weka', skipping this combination.
+Traceback (most recent call last):
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/run.py", line 340, in main
+    model = infer_data_job(
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/inference.py", line 211, in infer_data_job
+    model = infer_data(
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/inference.py", line 124, in infer_data
+    model = supported_VLM[model_name](**kwargs) if isinstance(model, str) else model
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/vlm/ThinkMorph.py", line 47, in __init__
+    os.makedirs(save_dir, exist_ok=True)
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/os.py", line 215, in makedirs
+    makedirs(head, exist_ok=exist_ok)
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/os.py", line 215, in makedirs
+    makedirs(head, exist_ok=exist_ok)
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/os.py", line 215, in makedirs
+    makedirs(head, exist_ok=exist_ok)
+  [Previous line repeated 4 more times]
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/os.py", line 225, in makedirs
+    mkdir(name, mode)
+PermissionError: [Errno 13] Permission denied: '/weka'
+[2026-02-17 01:18:37] ERROR - RUN - run.py: main - 496: Model bagel_mot x Dataset AI2ThorPT2P_dh_midpoint_sideview combination failed: [Errno 13] Permission denied: '/weka', skipping this combination.
+Traceback (most recent call last):
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/run.py", line 340, in main
+    model = infer_data_job(
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/inference.py", line 211, in infer_data_job
+    model = infer_data(
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/inference.py", line 124, in infer_data
+    model = supported_VLM[model_name](**kwargs) if isinstance(model, str) else model
+  File "/gpfs/home/linjli/source/SpatialReasoning_Eval/vlmeval/vlm/ThinkMorph.py", line 47, in __init__
+    os.makedirs(save_dir, exist_ok=True)
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/os.py", line 215, in makedirs
+    makedirs(head, exist_ok=exist_ok)
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/os.py", line 215, in makedirs
+    makedirs(head, exist_ok=exist_ok)
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/os.py", line 215, in makedirs
+    makedirs(head, exist_ok=exist_ok)
+  [Previous line repeated 4 more times]
+  File "/gpfs/projects/krishna/envs/thinkmorph/lib/python3.10/os.py", line 225, in makedirs
+    mkdir(name, mode)
+PermissionError: [Errno 13] Permission denied: '/weka'
