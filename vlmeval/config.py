@@ -1382,12 +1382,26 @@ thinkmorph_series = {
     ),
     "bagel_mot": partial(
         ThinkMorph,
-        model_path=os.environ.get("THINKMORPH_MODEL_PATH", "/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/models/BAGEL-7B-MoT"),
+        model_path=os.environ.get("THINKMORPH_MODEL_PATH", "ByteDance-Seed/BAGEL-7B-MoT"),
         think=True,
-        understanding_output=False,  # Enable visualization
+        understanding_output=True,  # Text-only output for MCQ evaluation
         temperature=0.3,
         max_think_token_n=4096,
-        save_dir=os.environ.get("THINKMORPH_SAVE_DIR", "/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/viz_outputs/bagel_mot")
+    ),
+    # Visual CoT eval: interleaved text + image generation.
+    # Set THINKMORPH_OUTPUT_RESOLUTION to match the training output latent size:
+    #   latent 64 -> 1024, latent 32 -> 512, latent 16 -> 256
+    # Input VAE transform is always 1024 (matching training).
+    "bagel_mot_vcot": partial(
+        ThinkMorph,
+        model_path=os.environ.get("THINKMORPH_MODEL_PATH", "ByteDance-Seed/BAGEL-7B-MoT"),
+        think=True,
+        understanding_output=False,
+        temperature=0.3,
+        max_think_token_n=4096,
+        image_resolution=1024,
+        output_image_resolution=int(os.environ.get("THINKMORPH_OUTPUT_RESOLUTION", "1024")),
+        save_dir=os.environ.get("THINKMORPH_SAVE_DIR", "/gpfs/scrubbed/krishna/linjli/bagel_eval/vcot_images"),
     ),
     # ========== Test models for AI2Thor spatial tasks ==========
     # Base ThinkMorph-7B model
