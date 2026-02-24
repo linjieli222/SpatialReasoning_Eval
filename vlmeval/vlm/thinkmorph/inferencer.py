@@ -20,6 +20,10 @@ GEN_THINK_SYSTEM_PROMPT = '''
 Let's think step by step to answer the question. For text-based thinking, enclose the process within <think> </think>, e.g. <think> thinking process here </think>. For visual thinking, enclose the content within <image_start> </image_end>, e.g. <image_start> thinking image here </image_end>. Finally conclude with the final answer wrapped in <answer></answer> tags, i.e.<answer> answer here </answer>.
 '''
 
+VLM_ANSWER_ONLY_SYSTEM_PROMPT = '''
+Answer the question. Conclude with the final answer wrapped in <answer></answer> tags, i.e.<answer> answer here </answer>.
+'''
+
 
 class InterleaveInferencer:
     def __init__(self, model, vae_model, tokenizer, vae_transform, vit_transform, new_token_ids):
@@ -236,11 +240,13 @@ class InterleaveInferencer:
         with torch.autocast(device_type="cuda", enabled=True, dtype=torch.bfloat16):
             if think:
                 if understanding_output:
-                    system_prompt = VLM_THINK_SYSTEM_PROMPT 
+                    system_prompt = VLM_THINK_SYSTEM_PROMPT
                 else:
                     system_prompt = GEN_THINK_SYSTEM_PROMPT
-                gen_context = self.update_context_text(system_prompt, gen_context)
-                cfg_img_context = self.update_context_text(system_prompt, cfg_img_context)
+            else:
+                system_prompt = VLM_ANSWER_ONLY_SYSTEM_PROMPT
+            gen_context = self.update_context_text(system_prompt, gen_context)
+            cfg_img_context = self.update_context_text(system_prompt, cfg_img_context)
 
             for input_term in input_lists:
                 if isinstance(input_term, str):
