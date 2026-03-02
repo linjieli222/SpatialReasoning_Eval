@@ -858,6 +858,65 @@ class AI2ThorSpatialVerification(AI2ThorPathTracing2PointV2):
 
         return pd.DataFrame(records)
 
+    def evaluate(self, eval_file, **judge_kwargs):
+        """Evaluate with accuracy, precision, recall, and F1 (Yes=positive class)."""
+        import numpy as np
+        from ..smp import load, dump
+
+        suffix = eval_file.split('.')[-1]
+        result_file = eval_file.replace(f'.{suffix}', f'_result.{suffix}')
+
+        data = load(eval_file)
+
+        # Score each sample
+        if 'hit' not in data.columns:
+            for i in range(len(data)):
+                item = data.iloc[i]
+                pred = self._extract_answer(item.get('prediction', ''))
+                gt = str(item.get('answer', '')).strip().upper()
+                data.loc[data.index[i], 'hit'] = 1 if pred == gt else 0
+                data.loc[data.index[i], 'pred_letter'] = pred
+            dump(data, result_file)
+
+        def _compute_metrics(df):
+            """Compute accuracy, precision, recall, F1 treating A (Yes) as positive."""
+            acc = df['hit'].mean() * 100
+            # True positives: GT=A and pred=A
+            tp = ((df['answer'] == 'A') & (df['pred_letter'] == 'A')).sum()
+            fp = ((df['answer'] == 'B') & (df['pred_letter'] == 'A')).sum()
+            fn = ((df['answer'] == 'A') & (df['pred_letter'] != 'A')).sum()
+            prec = tp / (tp + fp) * 100 if (tp + fp) > 0 else 0.0
+            rec = tp / (tp + fn) * 100 if (tp + fn) > 0 else 0.0
+            f1 = 2 * prec * rec / (prec + rec) if (prec + rec) > 0 else 0.0
+            return acc, prec, rec, f1
+
+        acc, prec, rec, f1 = _compute_metrics(data)
+        res = {
+            'Category': ['Overall'],
+            'Accuracy': [acc],
+            'Precision': [prec],
+            'Recall': [rec],
+            'F1': [f1],
+            'Count': [len(data)],
+        }
+
+        if 'category' in data.columns:
+            for cat in sorted(data['category'].unique()):
+                cat_data = data[data['category'] == cat]
+                c_acc, c_prec, c_rec, c_f1 = _compute_metrics(cat_data)
+                res['Category'].append(cat)
+                res['Accuracy'].append(c_acc)
+                res['Precision'].append(c_prec)
+                res['Recall'].append(c_rec)
+                res['F1'].append(c_f1)
+                res['Count'].append(len(cat_data))
+
+        res_df = pd.DataFrame(res)
+        score_file = eval_file.replace(f'.{suffix}', '_acc.csv')
+        dump(res_df, score_file)
+
+        return res_df
+
     @staticmethod
     def _extract_answer(pred):
         """Extract answer letter, handling Yes/No text output."""
