@@ -785,7 +785,7 @@ class AI2ThorSpatialVerification(AI2ThorPathTracing2PointV2):
     Mapped to A=Yes, B=No for MCQ evaluation.
     """
 
-    HF_REPO = 'linjieli222/ai2thor_spatial_verification_val_v1'
+    HF_REPO = 'linjieli222/ai2thor_spatial_verification_val_v2'
 
     def __init__(self, dataset='AI2ThorSV', subset='td_path',
                  use_sideview=False, nsamples=None, **kwargs):
@@ -908,7 +908,7 @@ class AI2ThorSpatialVerificationTest(AI2ThorSpatialVerification):
     Same format as AI2ThorSpatialVerification but test split.
     """
 
-    HF_REPO = 'linjieli222/ai2thor_spatial_verification_test_v1'
+    HF_REPO = 'linjieli222/ai2thor_spatial_verification_test_v2'
 
     def __init__(self, dataset='AI2ThorSVTest', subset='td_path',
                  use_sideview=False, nsamples=None, **kwargs):
