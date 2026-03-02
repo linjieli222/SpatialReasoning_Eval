@@ -645,6 +645,291 @@ class AI2ThorPathTracing2Point(ImageMCQDataset):
         return pd.DataFrame(records)
 
 
+class AI2ThorPathTracing2PointV2(AI2ThorPathTracing2Point):
+    """
+    AI2Thor Path Tracing 2-Point Dataset — Debiased Val V2.
+    Source: linjieli222/ai2thor_path_tracing_2point_tifa_filtered_val_v3
+    Same format as AI2ThorPathTracing2Point but with debiased validation samples.
+    """
+
+    HF_REPO = 'linjieli222/ai2thor_path_tracing_2point_tifa_filtered_val_v3'
+
+    def __init__(self, dataset='AI2ThorPT2PV2', subset='td_path',
+                 use_sideview=False, nsamples=None, **kwargs):
+        super().__init__(dataset=dataset, subset=subset,
+                         use_sideview=use_sideview, nsamples=nsamples, **kwargs)
+
+    @classmethod
+    def supported_datasets(cls):
+        return [
+            'AI2ThorPT2PV2',
+            'AI2ThorPT2PV2_dh_midpoint', 'AI2ThorPT2PV2_dh_midpoint_sideview',
+            'AI2ThorPT2PV2_td_ego_dir', 'AI2ThorPT2PV2_td_ego_dir_sideview',
+            'AI2ThorPT2PV2_td_ego_dir_arrow', 'AI2ThorPT2PV2_td_ego_dir_arrow_sideview',
+            'AI2ThorPT2PV2_td_ego_side', 'AI2ThorPT2PV2_td_ego_side_sideview',
+            'AI2ThorPT2PV2_td_ego_side_arrow', 'AI2ThorPT2PV2_td_ego_side_arrow_sideview',
+            'AI2ThorPT2PV2_td_midpoint', 'AI2ThorPT2PV2_td_midpoint_sideview',
+            'AI2ThorPT2PV2_td_path', 'AI2ThorPT2PV2_td_path_sideview',
+            'AI2ThorPT2PV2_td_path_arrow', 'AI2ThorPT2PV2_td_path_arrow_sideview',
+        ]
+
+    def load_data(self, dataset):
+        from datasets import load_dataset
+
+        # Try 'val' split first, fall back to 'train'
+        try:
+            hf_ds = load_dataset(self.HF_REPO, self.subset, split='val')
+        except ValueError:
+            hf_ds = load_dataset(self.HF_REPO, self.subset, split='train')
+
+        records = []
+        for idx, ex in enumerate(hf_ds):
+            if self.nsamples is not None and len(records) >= self.nsamples:
+                break
+
+            img_list = [pil_to_base64(ex['topdown_image'])]
+            for ego_img in (ex.get('ego_images') or []):
+                img_list.append(pil_to_base64(ego_img))
+
+            question = ex['question']
+
+            if self.use_sideview:
+                sv_img = ex.get('sideview_image') or ex.get('sideview_images')
+                sideview_b64 = pil_to_base64(sv_img)
+                img_list.append(sideview_b64)
+                sv_desc = ex.get('sideview_desc', '')
+                if sv_desc:
+                    sv_desc = self._sideview_desc_to_second_person(sv_desc)
+                    question = question + ' ' + sv_desc
+
+            img = img_list if len(img_list) > 1 else img_list[0]
+            choices = ex['choices']
+
+            records.append({
+                'index': len(records),
+                'image': img,
+                'question': question,
+                'A': choices[0] if len(choices) > 0 else '',
+                'B': choices[1] if len(choices) > 1 else '',
+                'C': choices[2] if len(choices) > 2 else '',
+                'D': choices[3] if len(choices) > 3 else '',
+                'answer': ex['answer'],
+            })
+
+        return pd.DataFrame(records)
+
+
+class AI2ThorPathTracing2PointV2Test(AI2ThorPathTracing2PointV2):
+    """
+    AI2Thor Path Tracing 2-Point Dataset — Debiased Test V3.
+    Source: linjieli222/ai2thor_path_tracing_2point_tifa_filtered_test_v3
+    Same format as V2 val but test split.
+    """
+
+    HF_REPO = 'linjieli222/ai2thor_path_tracing_2point_tifa_filtered_test_v3'
+
+    def __init__(self, dataset='AI2ThorPT2PV2Test', subset='td_path',
+                 use_sideview=False, nsamples=None, **kwargs):
+        super().__init__(dataset=dataset, subset=subset,
+                         use_sideview=use_sideview, nsamples=nsamples, **kwargs)
+
+    @classmethod
+    def supported_datasets(cls):
+        return [
+            'AI2ThorPT2PV2Test',
+            'AI2ThorPT2PV2Test_dh_midpoint', 'AI2ThorPT2PV2Test_dh_midpoint_sideview',
+            'AI2ThorPT2PV2Test_td_ego_dir', 'AI2ThorPT2PV2Test_td_ego_dir_sideview',
+            'AI2ThorPT2PV2Test_td_ego_dir_arrow', 'AI2ThorPT2PV2Test_td_ego_dir_arrow_sideview',
+            'AI2ThorPT2PV2Test_td_ego_side', 'AI2ThorPT2PV2Test_td_ego_side_sideview',
+            'AI2ThorPT2PV2Test_td_ego_side_arrow', 'AI2ThorPT2PV2Test_td_ego_side_arrow_sideview',
+            'AI2ThorPT2PV2Test_td_midpoint', 'AI2ThorPT2PV2Test_td_midpoint_sideview',
+            'AI2ThorPT2PV2Test_td_path', 'AI2ThorPT2PV2Test_td_path_sideview',
+            'AI2ThorPT2PV2Test_td_path_arrow', 'AI2ThorPT2PV2Test_td_path_arrow_sideview',
+        ]
+
+
+class AI2ThorPathTracing2PointV2Hard(AI2ThorPathTracing2PointV2):
+    """
+    AI2Thor Path Tracing 2-Point Dataset — Debiased Hard V3.
+    Source: linjieli222/ai2thor_path_tracing_2point_tifa_filtered_val_v3_hard
+    """
+
+    HF_REPO = 'linjieli222/ai2thor_path_tracing_2point_tifa_filtered_val_v3_hard'
+
+    def __init__(self, dataset='AI2ThorPT2PV2Hard', subset='td_path',
+                 use_sideview=False, nsamples=None, **kwargs):
+        super().__init__(dataset=dataset, subset=subset,
+                         use_sideview=use_sideview, nsamples=nsamples, **kwargs)
+
+    @classmethod
+    def supported_datasets(cls):
+        return [
+            'AI2ThorPT2PV2Hard',
+            'AI2ThorPT2PV2Hard_dh_midpoint', 'AI2ThorPT2PV2Hard_dh_midpoint_sideview',
+            'AI2ThorPT2PV2Hard_td_ego_dir', 'AI2ThorPT2PV2Hard_td_ego_dir_sideview',
+            'AI2ThorPT2PV2Hard_td_ego_dir_arrow', 'AI2ThorPT2PV2Hard_td_ego_dir_arrow_sideview',
+            'AI2ThorPT2PV2Hard_td_ego_side', 'AI2ThorPT2PV2Hard_td_ego_side_sideview',
+            'AI2ThorPT2PV2Hard_td_ego_side_arrow', 'AI2ThorPT2PV2Hard_td_ego_side_arrow_sideview',
+            'AI2ThorPT2PV2Hard_td_midpoint', 'AI2ThorPT2PV2Hard_td_midpoint_sideview',
+            'AI2ThorPT2PV2Hard_td_path', 'AI2ThorPT2PV2Hard_td_path_sideview',
+            'AI2ThorPT2PV2Hard_td_path_arrow', 'AI2ThorPT2PV2Hard_td_path_arrow_sideview',
+        ]
+
+
+class AI2ThorSpatialVerification(AI2ThorPathTracing2PointV2):
+    """
+    AI2Thor Spatial Verification Dataset — Val.
+    Source: linjieli222/ai2thor_spatial_verification_val_v1
+    Binary Yes/No spatial verification questions.
+    Same 8 subsets as PT2P datasets.
+    Mapped to A=Yes, B=No for MCQ evaluation.
+    """
+
+    HF_REPO = 'linjieli222/ai2thor_spatial_verification_val_v1'
+
+    def __init__(self, dataset='AI2ThorSV', subset='td_path',
+                 use_sideview=False, nsamples=None, **kwargs):
+        super().__init__(dataset=dataset, subset=subset,
+                         use_sideview=use_sideview, nsamples=nsamples, **kwargs)
+
+    @classmethod
+    def supported_datasets(cls):
+        return [
+            'AI2ThorSV',
+            'AI2ThorSV_dh_midpoint', 'AI2ThorSV_dh_midpoint_sideview',
+            'AI2ThorSV_td_ego_dir', 'AI2ThorSV_td_ego_dir_sideview',
+            'AI2ThorSV_td_ego_dir_arrow', 'AI2ThorSV_td_ego_dir_arrow_sideview',
+            'AI2ThorSV_td_ego_side', 'AI2ThorSV_td_ego_side_sideview',
+            'AI2ThorSV_td_ego_side_arrow', 'AI2ThorSV_td_ego_side_arrow_sideview',
+            'AI2ThorSV_td_midpoint', 'AI2ThorSV_td_midpoint_sideview',
+            'AI2ThorSV_td_path', 'AI2ThorSV_td_path_sideview',
+            'AI2ThorSV_td_path_arrow', 'AI2ThorSV_td_path_arrow_sideview',
+        ]
+
+    def load_data(self, dataset):
+        from datasets import load_dataset
+
+        try:
+            hf_ds = load_dataset(self.HF_REPO, self.subset, split='val')
+        except ValueError:
+            hf_ds = load_dataset(self.HF_REPO, self.subset, split='train')
+
+        records = []
+        for idx, ex in enumerate(hf_ds):
+            if self.nsamples is not None and len(records) >= self.nsamples:
+                break
+
+            img_list = [pil_to_base64(ex['topdown_image'])]
+            for ego_img in (ex.get('ego_images') or []):
+                img_list.append(pil_to_base64(ego_img))
+
+            question = ex['question']
+
+            if self.use_sideview:
+                sv_img = ex.get('sideview_image') or ex.get('sideview_images')
+                sideview_b64 = pil_to_base64(sv_img)
+                img_list.append(sideview_b64)
+                sv_desc = ex.get('sideview_desc', '')
+                if sv_desc:
+                    sv_desc = self._sideview_desc_to_second_person(sv_desc)
+                    question = question + ' ' + sv_desc
+
+            img = img_list if len(img_list) > 1 else img_list[0]
+
+            # Map Yes/No answer to A/B
+            answer_text = str(ex['answer']).strip()
+            answer_letter = 'A' if answer_text.lower() == 'yes' else 'B'
+
+            record = {
+                'index': len(records),
+                'image': img,
+                'question': question,
+                'A': 'Yes',
+                'B': 'No',
+                'answer': answer_letter,
+            }
+
+            # Store verification_type as category for per-type breakdown
+            vtype = ex.get('verification_type', '')
+            if vtype:
+                record['category'] = vtype
+
+            records.append(record)
+
+        return pd.DataFrame(records)
+
+    @staticmethod
+    def _extract_answer(pred):
+        """Extract answer letter, handling Yes/No text output."""
+        import re
+        pred = str(pred).strip()
+
+        # Try <answer> tag with letter
+        match = re.search(r'<answer>\s*([A-Ba-b])\s*</answer>', pred)
+        if match:
+            return match.group(1).upper()
+        match = re.search(r'<answer>\s*\(?([A-Ba-b])\)?\s*', pred)
+        if match:
+            return match.group(1).upper()
+
+        # Try <answer> tag with Yes/No text
+        match = re.search(r'<answer>\s*(yes|no)\s*</answer>', pred, re.IGNORECASE)
+        if match:
+            return 'A' if match.group(1).lower() == 'yes' else 'B'
+
+        # Exact single letter
+        if pred.upper() in ('A', 'B'):
+            return pred.upper()
+
+        # Check for Yes/No text anywhere
+        pred_lower = pred.lower().strip()
+        if pred_lower == 'yes':
+            return 'A'
+        if pred_lower == 'no':
+            return 'B'
+
+        # Check for Yes/No as last word (common in CoT responses)
+        match = re.search(r'\b(yes|no)\s*\.?\s*$', pred, re.IGNORECASE)
+        if match:
+            return 'A' if match.group(1).lower() == 'yes' else 'B'
+
+        # Fallback: letter match
+        match = re.search(r'\b([A-B])\b', pred)
+        if match:
+            return match.group(1)
+
+        return pred.strip().upper()
+
+
+class AI2ThorSpatialVerificationTest(AI2ThorSpatialVerification):
+    """
+    AI2Thor Spatial Verification Dataset — Test.
+    Source: linjieli222/ai2thor_spatial_verification_test_v1
+    Same format as AI2ThorSpatialVerification but test split.
+    """
+
+    HF_REPO = 'linjieli222/ai2thor_spatial_verification_test_v1'
+
+    def __init__(self, dataset='AI2ThorSVTest', subset='td_path',
+                 use_sideview=False, nsamples=None, **kwargs):
+        super().__init__(dataset=dataset, subset=subset,
+                         use_sideview=use_sideview, nsamples=nsamples, **kwargs)
+
+    @classmethod
+    def supported_datasets(cls):
+        return [
+            'AI2ThorSVTest',
+            'AI2ThorSVTest_dh_midpoint', 'AI2ThorSVTest_dh_midpoint_sideview',
+            'AI2ThorSVTest_td_ego_dir', 'AI2ThorSVTest_td_ego_dir_sideview',
+            'AI2ThorSVTest_td_ego_dir_arrow', 'AI2ThorSVTest_td_ego_dir_arrow_sideview',
+            'AI2ThorSVTest_td_ego_side', 'AI2ThorSVTest_td_ego_side_sideview',
+            'AI2ThorSVTest_td_ego_side_arrow', 'AI2ThorSVTest_td_ego_side_arrow_sideview',
+            'AI2ThorSVTest_td_midpoint', 'AI2ThorSVTest_td_midpoint_sideview',
+            'AI2ThorSVTest_td_path', 'AI2ThorSVTest_td_path_sideview',
+            'AI2ThorSVTest_td_path_arrow', 'AI2ThorSVTest_td_path_arrow_sideview',
+        ]
+
+
 class AI2ThorMultiViewCounting(ImageMCQDataset):
     """
     AI2Thor Multi-View Counting Dataset.
