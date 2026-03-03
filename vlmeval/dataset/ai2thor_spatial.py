@@ -1712,3 +1712,51 @@ class MessyTableCounting_10(MessyTableCounting):
     @classmethod
     def supported_datasets(cls):
         return ['MessyTableCounting_10']
+
+
+class RealPathTracing(AI2ThorPathTracing2Point):
+    """
+    Real Indoor Path Tracing Dataset.
+    Source: linjieli222/real_indoor_path_tracing
+    2 subsets: td_path (174 samples), td_path_arrow (158 samples).
+    Single image per sample, 4-choice MCQ (A/B/C/D).
+    """
+
+    HF_REPO = 'linjieli222/real_indoor_path_tracing'
+    SUBSETS = ['td_path', 'td_path_arrow']
+
+    def __init__(self, dataset='RealPT', subset='td_path', nsamples=None, **kwargs):
+        super().__init__(dataset=dataset, subset=subset,
+                         use_sideview=False, nsamples=nsamples, **kwargs)
+
+    @classmethod
+    def supported_datasets(cls):
+        return [
+            'RealPT', 'RealPT_td_path', 'RealPT_td_path_arrow',
+        ]
+
+    def load_data(self, dataset):
+        from datasets import load_dataset
+
+        hf_ds = load_dataset(self.HF_REPO, split=self.subset)
+
+        records = []
+        for idx, ex in enumerate(hf_ds):
+            if self.nsamples is not None and len(records) >= self.nsamples:
+                break
+
+            img_b64 = pil_to_base64(ex['image'])
+            choices = ex['choices']
+
+            records.append({
+                'index': len(records),
+                'image': img_b64,
+                'question': ex['question'],
+                'A': choices[0] if len(choices) > 0 else '',
+                'B': choices[1] if len(choices) > 1 else '',
+                'C': choices[2] if len(choices) > 2 else '',
+                'D': choices[3] if len(choices) > 3 else '',
+                'answer': ex['answer'],
+            })
+
+        return pd.DataFrame(records)

@@ -73,6 +73,7 @@ from .ai2thor_spatial import (
     AI2ThorPathTracing2PointV2,
     AI2ThorPathTracing2PointV2Test,
     AI2ThorPathTracing2PointV2Hard,
+    RealPathTracing,
     AI2ThorSpatialVerification,
     AI2ThorSpatialVerificationTest
 )
@@ -267,6 +268,7 @@ IMAGE_DATASET = [
     AI2ThorPathTracing2PointV2,
     AI2ThorPathTracing2PointV2Test,
     AI2ThorPathTracing2PointV2Hard,
+    RealPathTracing,
     AI2ThorSpatialVerification,
     AI2ThorSpatialVerificationTest,
     SATCircularLimited, SATPerspectiveTaking,
