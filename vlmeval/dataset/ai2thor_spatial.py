@@ -467,6 +467,7 @@ class AI2ThorPathTracing2Point(ImageMCQDataset):
             'AI2ThorPT2P_td_path', 'AI2ThorPT2P_td_path_sideview',
             'AI2ThorPT2P_td_path_arrow', 'AI2ThorPT2P_td_path_arrow_sideview',
             'AI2ThorPT2P_td_path_vcot_prefill',
+            'AI2ThorPT2P_td_ego_dir_vcot_prefill',
         ]
 
     def build_prompt(self, line):

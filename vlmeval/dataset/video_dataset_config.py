@@ -234,6 +234,7 @@ ai2thor_dataset = {
     'AI2ThorPT2P_td_path_arrow_sideview': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_td_path_arrow_sideview', subset='td_path_arrow', use_sideview=True),
     # Path Tracing 2-Point: VCoT GT prefill (topdown-only input, GT sideview injected as prefill)
     'AI2ThorPT2P_td_path_vcot_prefill': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_td_path_vcot_prefill', subset='td_path', use_sideview=False, vcot_prefill=True),
+    'AI2ThorPT2P_td_ego_dir_vcot_prefill': partial(AI2ThorPathTracing2Point, dataset='AI2ThorPT2P_td_ego_dir_vcot_prefill', subset='td_ego_dir', use_sideview=False, vcot_prefill=True),
     # Real Indoor Path Tracing: 2 subsets (td_path, td_path_arrow)
     'RealPT_td_path': partial(RealPathTracing, dataset='RealPT_td_path', subset='td_path'),
     'RealPT_td_path_arrow': partial(RealPathTracing, dataset='RealPT_td_path_arrow', subset='td_path_arrow'),
