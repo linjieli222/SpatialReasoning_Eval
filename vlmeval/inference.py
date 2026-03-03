@@ -1,3 +1,4 @@
+import glob as glob_module
 import torch
 import torch.distributed as dist
 from vlmeval.config import supported_VLM
@@ -204,6 +205,32 @@ def infer_data_job(
             dump(results, prev_file)
         if world_size > 1:
             dist.barrier()
+
+    # Salvage predictions from prior runs that used a different world_size.
+    # Per-rank pkl files are named {rank}{world_size}_{dataset_name}.pkl and
+    # contain dict[index -> prediction].  When world_size changes (e.g. 2→8),
+    # the new run won't find the old files.  Merge them into PREV so every
+    # rank can skip already-completed indices regardless of the original shard count.
+    if rank == 0:
+        stale_pkls = glob_module.glob(osp.join(work_dir, f'*_{dataset_name}.pkl'))
+        current_pattern = f'{world_size}_{dataset_name}.pkl'
+        stale_pkls = [p for p in stale_pkls if not p.endswith(current_pattern)
+                      and osp.basename(p) != f'{model_name}_{dataset_name}_PREV.pkl']
+        if stale_pkls:
+            merged = load(prev_file) if osp.exists(prev_file) else {}
+            for p in stale_pkls:
+                try:
+                    merged.update(load(p))
+                except Exception:
+                    pass
+            if merged:
+                dump(merged, prev_file)
+                print(f'[resume] Salvaged {len(merged)} predictions from {len(stale_pkls)} '
+                      f'stale pkl file(s) into PREV for {dataset_name}')
+            for p in stale_pkls:
+                os.remove(p)
+    if world_size > 1:
+        dist.barrier()
 
     tmpl = osp.join(work_dir, '{}' + f'{world_size}_{dataset_name}.pkl')
     out_file = tmpl.format(rank)
