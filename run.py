@@ -345,7 +345,8 @@ def main():
                             verbose=args.verbose,
                             api_nproc=args.api_nproc,
                             ignore_failed=args.ignore,
-                            use_vllm=args.use_vllm)
+                            use_vllm=args.use_vllm,
+                            pred_root_meta=pred_root_meta)
 
                 # Set the judge kwargs first before evaluation or dumping
 

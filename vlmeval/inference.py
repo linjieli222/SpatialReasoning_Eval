@@ -187,7 +187,8 @@ def _is_structured_record(v):
 
 # A wrapper for infer_data, do the pre & post processing
 def infer_data_job(
-    model, work_dir, model_name, dataset, verbose=False, api_nproc=4, ignore_failed=False, use_vllm=False
+    model, work_dir, model_name, dataset, verbose=False, api_nproc=4, ignore_failed=False, use_vllm=False,
+    pred_root_meta=None,
 ):
     rank, world_size = get_rank_and_world_size()
     dataset_name = dataset.dataset_name
@@ -206,16 +207,33 @@ def infer_data_job(
         if world_size > 1:
             dist.barrier()
 
-    # Salvage predictions from prior runs that used a different world_size.
-    # Per-rank pkl files are named {rank}{world_size}_{dataset_name}.pkl and
-    # contain dict[index -> prediction].  When world_size changes (e.g. 2→8),
-    # the new run won't find the old files.  Merge them into PREV so every
-    # rank can skip already-completed indices regardless of the original shard count.
+    # Salvage predictions from prior runs that used a different world_size or
+    # a different eval_id (timestamp/git-hash).  Per-rank pkl files are named
+    # {rank}{world_size}_{dataset_name}.pkl with dict[index -> prediction].
+    # Scan both the current work_dir AND sibling timestamp directories under
+    # pred_root_meta so that a 2-GPU→8-GPU switch (which also changes the git
+    # hash and thus the eval_id directory) can still resume.
     if rank == 0:
-        stale_pkls = glob_module.glob(osp.join(work_dir, f'*_{dataset_name}.pkl'))
+        search_dirs = [work_dir]
+        if pred_root_meta and osp.isdir(pred_root_meta):
+            for d in os.listdir(pred_root_meta):
+                full = osp.join(pred_root_meta, d)
+                if osp.isdir(full) and full != work_dir:
+                    search_dirs.append(full)
+
         current_pattern = f'{world_size}_{dataset_name}.pkl'
-        stale_pkls = [p for p in stale_pkls if not p.endswith(current_pattern)
-                      and osp.basename(p) != f'{model_name}_{dataset_name}_PREV.pkl']
+        prev_basename = f'{model_name}_{dataset_name}_PREV.pkl'
+        stale_pkls = []
+        for d in search_dirs:
+            for p in glob_module.glob(osp.join(d, f'*_{dataset_name}.pkl')):
+                bn = osp.basename(p)
+                # Keep current-run pkl files in work_dir (they match world_size)
+                if d == work_dir and bn.endswith(current_pattern):
+                    continue
+                if bn == prev_basename:
+                    continue
+                stale_pkls.append(p)
+
         if stale_pkls:
             merged = load(prev_file) if osp.exists(prev_file) else {}
             for p in stale_pkls:
