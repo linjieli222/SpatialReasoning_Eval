@@ -1735,6 +1735,44 @@ class RealPathTracing(AI2ThorPathTracing2Point):
             'RealPT', 'RealPT_td_path', 'RealPT_td_path_arrow',
         ]
 
+    def build_prompt(self, line):
+        """Build prompt with single image prepended (no <image_N> tags in question)."""
+        import string
+
+        if isinstance(line, int):
+            line = self.data.iloc[line]
+
+        if self.meta_only:
+            from ..smp import toliststr
+            tgt_path = toliststr(line['image_path'])
+        else:
+            tgt_path = self.dump_image(line)
+
+        question = line['question']
+
+        options = {
+            cand: line[cand]
+            for cand in string.ascii_uppercase
+            if cand in line and not pd.isna(line[cand])
+        }
+        options_prompt = ''
+        if len(options):
+            options_prompt = 'Options:\n'
+            for key, item in options.items():
+                options_prompt += f'{key}. {item}\n'
+            options_prompt += 'Please select the correct answer from the options above. \n'
+
+        msgs = []
+        if isinstance(tgt_path, list):
+            msgs.extend([dict(type='image', value=p) for p in tgt_path])
+        else:
+            msgs.append(dict(type='image', value=tgt_path))
+        msgs.append(dict(type='text', value=question))
+        if options_prompt:
+            msgs.append(dict(type='text', value=options_prompt))
+
+        return msgs
+
     def load_data(self, dataset):
         from datasets import load_dataset
 
