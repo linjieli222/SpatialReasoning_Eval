@@ -1403,6 +1403,20 @@ thinkmorph_series = {
         output_image_resolution=int(os.environ.get("THINKMORPH_OUTPUT_RESOLUTION", "1024")),
         save_dir=os.environ.get("THINKMORPH_SAVE_DIR", "/gpfs/scrubbed/krishna/linjli/bagel_eval/vcot_images"),
     ),
+    # VCoT GT prefill eval: inject GT sideview as prefill, skip diffusion.
+    # Uses understanding_output=False so VAE tokens are included for input images.
+    # Set THINKMORPH_OUTPUT_RESOLUTION to match the training output latent size.
+    "bagel_mot_vcot_prefill": partial(
+        ThinkMorph,
+        model_path=os.environ.get("THINKMORPH_MODEL_PATH", "ByteDance-Seed/BAGEL-7B-MoT"),
+        think=True,
+        understanding_output=False,
+        temperature=0.3,
+        max_think_token_n=4096,
+        image_resolution=1024,
+        output_image_resolution=int(os.environ.get("THINKMORPH_OUTPUT_RESOLUTION", "1024")),
+        save_dir=os.environ.get("THINKMORPH_SAVE_DIR", "/gpfs/scrubbed/krishna/linjli/bagel_eval/vcot_prefill_images"),
+    ),
     # ========== Test models for AI2Thor spatial tasks ==========
     # Base ThinkMorph-7B model
     "thinkmorph_base": partial(

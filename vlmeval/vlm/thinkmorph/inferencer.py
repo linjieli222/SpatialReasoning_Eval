@@ -216,6 +216,7 @@ class InterleaveInferencer:
         input_lists: List[Union[str, Image.Image]],
         think=False,
         understanding_output=False,
+        gt_prefill=None,
 
         max_think_token_n=1000,
         do_sample=False,
@@ -236,6 +237,9 @@ class InterleaveInferencer:
         gen_context = self.init_gen_context()
         cfg_text_context = deepcopy(gen_context)
         cfg_img_context = deepcopy(gen_context)
+        # Preserve the configured output resolution before the input loop
+        # overwrites image_shapes with input image dimensions
+        output_image_shapes = image_shapes
 
         with torch.autocast(device_type="cuda", enabled=True, dtype=torch.bfloat16):
             # Always add system prompt - all models are trained with it
@@ -265,7 +269,28 @@ class InterleaveInferencer:
                 else:
                     raise ValueError(f"Unsupported input type: {type(input_term)}")
 
-            if understanding_output:
+            if gt_prefill is not None:
+                # GT prefill branch: inject GT sideview as <think>desc</think><image_start>[VAE tokens]
+                # then let model generate <image_end><answer>X</answer>
+                gt_desc = gt_prefill['desc']
+                gt_image = gt_prefill['image']
+
+                # Inject think text + image_start token
+                prefill_text = f"<think>{gt_desc}</think><image_start>"
+                gen_context = self.update_context_text(prefill_text, gen_context)
+                output_list.append(prefill_text)
+
+                # Resize GT image to output resolution and inject as VAE tokens
+                gt_image_resized = gt_image.resize((output_image_shapes[1], output_image_shapes[0]))
+                gt_img_input = self.vae_transform.resize_transform(pil_img2rgb(gt_image_resized))
+                gen_context = self.update_context_image(gt_img_input, gen_context, vae=True, vit=False)
+                output_list.append(gt_image)
+
+                # Generate answer text (model should output <image_end><answer>X</answer>)
+                gen_text = self.gen_text(gen_context, do_sample=do_sample, temperature=text_temperature, max_length=max_think_token_n)
+                output_list.append(gen_text)
+
+            elif understanding_output:
                 gen_text = self.gen_text(gen_context, do_sample=do_sample, temperature=text_temperature, max_length=max_think_token_n)
                 output_list.append(gen_text)
 

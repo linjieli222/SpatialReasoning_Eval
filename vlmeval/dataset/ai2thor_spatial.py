@@ -447,9 +447,10 @@ class AI2ThorPathTracing2Point(ImageMCQDataset):
     ]
 
     def __init__(self, dataset='AI2ThorPathTracing2Point', subset='td_path',
-                 use_sideview=False, nsamples=None, **kwargs):
+                 use_sideview=False, vcot_prefill=False, nsamples=None, **kwargs):
         self.subset = subset
         self.use_sideview = use_sideview
+        self.vcot_prefill = vcot_prefill
         self.nsamples = nsamples
         super().__init__(dataset=dataset, **kwargs)
 
@@ -465,6 +466,7 @@ class AI2ThorPathTracing2Point(ImageMCQDataset):
             'AI2ThorPT2P_td_midpoint', 'AI2ThorPT2P_td_midpoint_sideview',
             'AI2ThorPT2P_td_path', 'AI2ThorPT2P_td_path_sideview',
             'AI2ThorPT2P_td_path_arrow', 'AI2ThorPT2P_td_path_arrow_sideview',
+            'AI2ThorPT2P_td_path_vcot_prefill',
         ]
 
     def build_prompt(self, line):
@@ -631,7 +633,7 @@ class AI2ThorPathTracing2Point(ImageMCQDataset):
             # Map choices list to A/B/C/D
             choices = ex['choices']
 
-            records.append({
+            record = {
                 'index': len(records),
                 'image': img,
                 'question': question,
@@ -640,7 +642,20 @@ class AI2ThorPathTracing2Point(ImageMCQDataset):
                 'C': choices[2] if len(choices) > 2 else '',
                 'D': choices[3] if len(choices) > 3 else '',
                 'answer': ex['answer'],
-            })
+            }
+
+            # For vcot_prefill, store GT sideview data as extra columns
+            if self.vcot_prefill:
+                sv_img = ex.get('sideview_image') or ex.get('sideview_images')
+                record['gt_sideview_image'] = pil_to_base64(sv_img)
+                # Clean sideview_desc to match training format
+                sv_desc_raw = ex.get('sideview_desc', '')
+                sv_desc_clean = sv_desc_raw.replace(' <image_2>', '').replace('<image_2>', '')
+                sv_desc_clean = sv_desc_clean.replace(' ..', '.').replace(' .', '.')
+                sv_desc_clean = sv_desc_clean.replace(':.', ':').replace('  ', ' ').strip()
+                record['gt_sideview_desc'] = sv_desc_clean
+
+            records.append(record)
 
         return pd.DataFrame(records)
 

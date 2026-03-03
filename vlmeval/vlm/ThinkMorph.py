@@ -221,20 +221,74 @@ class ThinkMorph(BaseModel):
 
 
     def use_custom_prompt(self, dataset):
-        """Use custom prompt for SAT perspective taking dataset and SideviewOverfit."""
+        """Use custom prompt for SAT perspective taking dataset, SideviewOverfit, and vcot_prefill."""
         if dataset is not None and 'SAT_perspective' in dataset:
             return True
         if dataset is not None and 'SideviewOverfit' in dataset:
             return True
+        if dataset is not None and 'vcot_prefill' in dataset:
+            return True
         return False
 
     def build_prompt(self, line, dataset=None):
-        """Build custom prompt for SAT perspective taking dataset and SideviewOverfit."""
+        """Build custom prompt for SAT perspective taking, SideviewOverfit, and vcot_prefill."""
         import string
         import pandas as pd
 
         if not self.use_custom_prompt(dataset):
             return None
+
+        # Handle vcot_prefill: extract GT sideview data, build standard prompt
+        if dataset is not None and 'vcot_prefill' in dataset:
+            import io
+            import base64
+            import re
+
+            # Extract GT sideview data for later use in generate_inner
+            gt_sv_b64 = line.get('gt_sideview_image', '')
+            gt_sv_desc = line.get('gt_sideview_desc', '')
+            if gt_sv_b64:
+                gt_sv_pil = Image.open(io.BytesIO(base64.b64decode(gt_sv_b64))).convert('RGB')
+                self._gt_prefill = {'image': gt_sv_pil, 'desc': gt_sv_desc}
+            else:
+                self._gt_prefill = None
+
+            # Build standard prompt (same interleaving logic as dataset's build_prompt)
+            tgt_path = self.dump_image(line, dataset)
+            if not isinstance(tgt_path, list):
+                tgt_path = [tgt_path]
+
+            question = line['question']
+
+            options = {
+                cand: line[cand]
+                for cand in string.ascii_uppercase
+                if cand in line and not pd.isna(line[cand])
+            }
+            options_prompt = ''
+            if len(options):
+                options_prompt = 'Options:\n'
+                for key, item in options.items():
+                    options_prompt += f'{key}. {item}\n'
+                options_prompt += 'Please select the correct answer from the options above. \n'
+
+            parts = re.split(r'(<image_\d+>)', question)
+            msgs = []
+            for part in parts:
+                m = re.match(r'<image_(\d+)>', part)
+                if m:
+                    img_idx = int(m.group(1)) - 1
+                    if img_idx < len(tgt_path):
+                        msgs.append(dict(type='image', value=tgt_path[img_idx]))
+                else:
+                    text = part.strip()
+                    if text:
+                        msgs.append(dict(type='text', value=text))
+
+            if options_prompt:
+                msgs.append(dict(type='text', value=options_prompt))
+
+            return msgs
 
         tgt_path = self.dump_image(line, dataset)
         question = line['question']
@@ -316,13 +370,20 @@ class ThinkMorph(BaseModel):
     def generate_inner(self, message, dataset=None, sample_index=None):
         input_list = self.build_thinkmorph_input(message)
 
+        # Extract gt_prefill if set by build_prompt (for vcot_prefill datasets)
+        gt_prefill = getattr(self, '_gt_prefill', None)
+        if gt_prefill is not None:
+            self._gt_prefill = None  # Clear after use
+
         if self.understanding_output:
             output_dict = self.inferencer(input_list=input_list, think=self.think,
-                                        understanding_output=True, **self.inference_hyper)
+                                        understanding_output=True, gt_prefill=gt_prefill,
+                                        **self.inference_hyper)
             final_output = output_dict[0]
 
         else:
-            output_list = self.inferencer(input_list=input_list, think=self.think, **self.inference_hyper)
+            output_list = self.inferencer(input_list=input_list, think=self.think,
+                                         gt_prefill=gt_prefill, **self.inference_hyper)
             results = []
             text_round = 0
 
