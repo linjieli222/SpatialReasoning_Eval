@@ -28,7 +28,7 @@ class ThinkMorph(BaseModel):
     INSTALL_REQ = False
     INTERLEAVE = True
 
-    def __init__(self, model_path='ThinkMorph/ThinkMorph-7B', think=True, understanding_output=True, save_dir=None, temperature=0.3, max_think_token_n=4096, num_timesteps=50, image_resolution=1024, output_image_resolution=None, visual_gen=True, **kwargs):
+    def __init__(self, model_path='ThinkMorph/ThinkMorph-7B', think=True, understanding_output=True, save_dir=None, temperature=0.3, max_think_token_n=4096, num_timesteps=50, image_resolution=1024, output_image_resolution=None, visual_gen=True, extra_instruction=None, **kwargs):
         # self.check_install()
         assert model_path is not None
         # If model_path looks like an HF repo ID (not a local dir), download via huggingface_hub
@@ -51,6 +51,7 @@ class ThinkMorph(BaseModel):
         # input images at 1024x1024.
         self.output_image_resolution = output_image_resolution if output_image_resolution is not None else image_resolution
         self.visual_gen = visual_gen
+        self.extra_instruction = extra_instruction
 
         if save_dir is not None:
             os.makedirs(save_dir, exist_ok=True)
@@ -364,6 +365,8 @@ class ThinkMorph(BaseModel):
             raise ValueError("Bagel requires at least one image input")
 
         final_text = " ".join(text_parts)
+        if self.extra_instruction:
+            final_text += "\n" + self.extra_instruction
         input_list = images + [final_text]
         return input_list
     
