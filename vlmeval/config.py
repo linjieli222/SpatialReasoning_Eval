@@ -1403,6 +1403,30 @@ thinkmorph_series = {
         output_image_resolution=int(os.environ.get("THINKMORPH_OUTPUT_RESOLUTION", "1024")),
         save_dir=os.environ.get("THINKMORPH_SAVE_DIR", "/gpfs/scrubbed/krishna/linjli/bagel_eval/vcot_images"),
     ),
+    # Text-only eval for VCoT checkpoints: forces answer-only mode with explicit
+    # instruction to not generate images. Use this to measure VCoT model's text
+    # reasoning ability without image generation.
+    "bagel_mot_nothink": partial(
+        ThinkMorph,
+        model_path=os.environ.get("THINKMORPH_MODEL_PATH", "ByteDance-Seed/BAGEL-7B-MoT"),
+        think=False,
+        understanding_output=True,
+        temperature=0.3,
+        max_think_token_n=4096,
+        extra_instruction="Do not think or generate any images.",
+    ),
+    # Nothink with VCoT system prompt: uses the think system prompt but appends
+    # an instruction to answer directly without thinking or generating images.
+    # Matches the answer_only_think training variant.
+    "bagel_mot_nothink_think_prompt": partial(
+        ThinkMorph,
+        model_path=os.environ.get("THINKMORPH_MODEL_PATH", "ByteDance-Seed/BAGEL-7B-MoT"),
+        think=True,
+        understanding_output=True,
+        temperature=0.3,
+        max_think_token_n=4096,
+        extra_instruction="Answer the question directly, do not think or generate any images.",
+    ),
     # VCoT GT prefill eval: inject GT sideview as prefill, skip diffusion.
     # Uses understanding_output=False so VAE tokens are included for input images.
     # Set THINKMORPH_OUTPUT_RESOLUTION to match the training output latent size.
