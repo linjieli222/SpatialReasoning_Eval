@@ -255,6 +255,9 @@ ai2thor_dataset = {
     'AI2ThorPT2PV2_td_path_sideview': partial(AI2ThorPathTracing2PointV2, dataset='AI2ThorPT2PV2_td_path_sideview', subset='td_path', use_sideview=True),
     'AI2ThorPT2PV2_td_path_arrow': partial(AI2ThorPathTracing2PointV2, dataset='AI2ThorPT2PV2_td_path_arrow', subset='td_path_arrow', use_sideview=False),
     'AI2ThorPT2PV2_td_path_arrow_sideview': partial(AI2ThorPathTracing2PointV2, dataset='AI2ThorPT2PV2_td_path_arrow_sideview', subset='td_path_arrow', use_sideview=True),
+    'AI2ThorPT2PV2_td_ego_dir_vcot_prefill': partial(AI2ThorPathTracing2PointV2, dataset='AI2ThorPT2PV2_td_ego_dir_vcot_prefill', subset='td_ego_dir', use_sideview=False, vcot_prefill=True),
+    'AI2ThorPT2PV2_td_path_vcot_prefill': partial(AI2ThorPathTracing2PointV2, dataset='AI2ThorPT2PV2_td_path_vcot_prefill', subset='td_path', use_sideview=False, vcot_prefill=True),
+    'AI2ThorPT2PV2_td_path_arrow_vcot_prefill': partial(AI2ThorPathTracing2PointV2, dataset='AI2ThorPT2PV2_td_path_arrow_vcot_prefill', subset='td_path_arrow', use_sideview=False, vcot_prefill=True),
     # Path Tracing 2-Point V2 Test (debiased): 8 subsets x 2 (with/without sideview) = 16 entries
     'AI2ThorPT2PV2Test_dh_midpoint': partial(AI2ThorPathTracing2PointV2Test, dataset='AI2ThorPT2PV2Test_dh_midpoint', subset='dh_midpoint', use_sideview=False),
     'AI2ThorPT2PV2Test_dh_midpoint_sideview': partial(AI2ThorPathTracing2PointV2Test, dataset='AI2ThorPT2PV2Test_dh_midpoint_sideview', subset='dh_midpoint', use_sideview=True),

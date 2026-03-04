@@ -671,9 +671,10 @@ class AI2ThorPathTracing2PointV2(AI2ThorPathTracing2Point):
     HF_REPO = 'linjieli222/ai2thor_path_tracing_2point_tifa_filtered_val_v3'
 
     def __init__(self, dataset='AI2ThorPT2PV2', subset='td_path',
-                 use_sideview=False, nsamples=None, **kwargs):
+                 use_sideview=False, vcot_prefill=False, nsamples=None, **kwargs):
         super().__init__(dataset=dataset, subset=subset,
-                         use_sideview=use_sideview, nsamples=nsamples, **kwargs)
+                         use_sideview=use_sideview, vcot_prefill=vcot_prefill,
+                         nsamples=nsamples, **kwargs)
 
     @classmethod
     def supported_datasets(cls):
@@ -687,6 +688,9 @@ class AI2ThorPathTracing2PointV2(AI2ThorPathTracing2Point):
             'AI2ThorPT2PV2_td_midpoint', 'AI2ThorPT2PV2_td_midpoint_sideview',
             'AI2ThorPT2PV2_td_path', 'AI2ThorPT2PV2_td_path_sideview',
             'AI2ThorPT2PV2_td_path_arrow', 'AI2ThorPT2PV2_td_path_arrow_sideview',
+            'AI2ThorPT2PV2_td_ego_dir_vcot_prefill',
+            'AI2ThorPT2PV2_td_path_vcot_prefill',
+            'AI2ThorPT2PV2_td_path_arrow_vcot_prefill',
         ]
 
     def load_data(self, dataset):
@@ -721,7 +725,7 @@ class AI2ThorPathTracing2PointV2(AI2ThorPathTracing2Point):
             img = img_list if len(img_list) > 1 else img_list[0]
             choices = ex['choices']
 
-            records.append({
+            record = {
                 'index': len(records),
                 'image': img,
                 'question': question,
@@ -730,7 +734,19 @@ class AI2ThorPathTracing2PointV2(AI2ThorPathTracing2Point):
                 'C': choices[2] if len(choices) > 2 else '',
                 'D': choices[3] if len(choices) > 3 else '',
                 'answer': ex['answer'],
-            })
+            }
+
+            # For vcot_prefill, store GT sideview data as extra columns
+            if self.vcot_prefill:
+                sv_img = ex.get('sideview_image') or ex.get('sideview_images')
+                record['gt_sideview_image'] = pil_to_base64(sv_img)
+                sv_desc_raw = ex.get('sideview_desc', '')
+                sv_desc_clean = sv_desc_raw.replace(' <image_2>', '').replace('<image_2>', '')
+                sv_desc_clean = sv_desc_clean.replace(' ..', '.').replace(' .', '.')
+                sv_desc_clean = sv_desc_clean.replace(':.', ':').replace('  ', ' ').strip()
+                record['gt_sideview_desc'] = sv_desc_clean
+
+            records.append(record)
 
         return pd.DataFrame(records)
 
