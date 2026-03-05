@@ -124,6 +124,19 @@ o1_apis = {
 }
 
 api_models = {
+    # Azure OpenAI
+    "AzureGPT": partial(
+        GPT4V,
+        model="gpt-5",
+        temperature=0,
+        img_size=-1,
+        img_detail="high",
+        retry=5,
+        verbose=False,
+        use_azure=True,
+        max_tokens=4096,
+        timeout=300,
+    ),
     # GPT
     "GPT4V": partial(
         GPT4V,
@@ -1414,6 +1427,19 @@ thinkmorph_series = {
         temperature=0.3,
         max_think_token_n=4096,
         extra_instruction="Do not think or generate any images.",
+    ),
+    # Answer-only prompt with visual generation enabled (understanding_output=False).
+    # Tests if the model generates useful sideview images without think prompting.
+    "bagel_mot_nothink_vcot": partial(
+        ThinkMorph,
+        model_path=os.environ.get("THINKMORPH_MODEL_PATH", "ByteDance-Seed/BAGEL-7B-MoT"),
+        think=False,
+        understanding_output=False,
+        temperature=0.3,
+        max_think_token_n=4096,
+        image_resolution=1024,
+        output_image_resolution=int(os.environ.get("THINKMORPH_OUTPUT_RESOLUTION", "1024")),
+        save_dir=os.environ.get("THINKMORPH_SAVE_DIR", "/gpfs/scrubbed/krishna/linjli/bagel_eval/nothink_vcot_images"),
     ),
     # Nothink with VCoT system prompt: uses the think system prompt but appends
     # an instruction to answer directly without thinking or generating images.

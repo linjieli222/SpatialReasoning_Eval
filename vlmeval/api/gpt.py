@@ -126,15 +126,19 @@ class OpenAIWrapper(BaseAPI):
             )
             endpoint = os.getenv('AZURE_OPENAI_ENDPOINT', None)
             assert endpoint is not None, 'Please set the environment variable AZURE_OPENAI_ENDPOINT. '
-            deployment_name = os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME', None)
-            assert deployment_name is not None, 'Please set the environment variable AZURE_OPENAI_DEPLOYMENT_NAME. '
-            api_version = os.getenv('OPENAI_API_VERSION', None)
-            assert api_version is not None, 'Please set the environment variable OPENAI_API_VERSION. '
+            deployment_name = os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME', None) or os.getenv('AZURE_OPENAI_DEPLOYMENT', None)
+            assert deployment_name is not None, (
+                'Please set the environment variable AZURE_OPENAI_DEPLOYMENT_NAME or AZURE_OPENAI_DEPLOYMENT. '
+            )
+            api_version = os.getenv('OPENAI_API_VERSION', None) or os.getenv('AZURE_OPENAI_API_VERSION', None)
+            assert api_version is not None, (
+                'Please set the environment variable OPENAI_API_VERSION or AZURE_OPENAI_API_VERSION. '
+            )
 
             self.api_base = api_base_template.format(
-                endpoint=os.getenv('AZURE_OPENAI_ENDPOINT'),
-                deployment_name=os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME'),
-                api_version=os.getenv('OPENAI_API_VERSION')
+                endpoint=endpoint,
+                deployment_name=deployment_name,
+                api_version=api_version
             )
         else:
             if api_base is None:
