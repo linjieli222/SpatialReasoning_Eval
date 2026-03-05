@@ -28,7 +28,7 @@ class ThinkMorph(BaseModel):
     INSTALL_REQ = False
     INTERLEAVE = True
 
-    def __init__(self, model_path='ThinkMorph/ThinkMorph-7B', think=True, understanding_output=True, save_dir=None, temperature=0.3, max_think_token_n=4096, num_timesteps=50, image_resolution=1024, output_image_resolution=None, visual_gen=True, extra_instruction=None, **kwargs):
+    def __init__(self, model_path='ThinkMorph/ThinkMorph-7B', think=True, understanding_output=True, vae_input=None, save_dir=None, temperature=0.3, max_think_token_n=4096, num_timesteps=50, image_resolution=1024, output_image_resolution=None, visual_gen=True, extra_instruction=None, **kwargs):
         # self.check_install()
         assert model_path is not None
         # If model_path looks like an HF repo ID (not a local dir), download via huggingface_hub
@@ -39,6 +39,7 @@ class ThinkMorph(BaseModel):
             assert save_dir is not None
         self.model_path = model_path
         self.understanding_output = understanding_output
+        self.vae_input = vae_input
         self.save_dir = save_dir
         self.think = think
         self.temperature = temperature
@@ -380,12 +381,14 @@ class ThinkMorph(BaseModel):
 
         if self.understanding_output:
             output_dict = self.inferencer(input_list=input_list, think=self.think,
-                                        understanding_output=True, gt_prefill=gt_prefill,
+                                        understanding_output=True, vae_input=self.vae_input,
+                                        gt_prefill=gt_prefill,
                                         **self.inference_hyper)
             final_output = output_dict[0]
 
         else:
             output_list = self.inferencer(input_list=input_list, think=self.think,
+                                         vae_input=self.vae_input,
                                          gt_prefill=gt_prefill, **self.inference_hyper)
             results = []
             text_round = 0

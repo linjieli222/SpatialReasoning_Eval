@@ -1428,6 +1428,19 @@ thinkmorph_series = {
         max_think_token_n=4096,
         extra_instruction="Do not think or generate any images.",
     ),
+    # Answer-only with VAE input encoding (fixes train-eval mismatch for models
+    # trained with visual_gen=True). understanding_output=True (text-only generation),
+    # but vae_input=True forces VAE encoding for input images to match training.
+    "bagel_mot_answeronly": partial(
+        ThinkMorph,
+        model_path=os.environ.get("THINKMORPH_MODEL_PATH", "ByteDance-Seed/BAGEL-7B-MoT"),
+        think=False,
+        understanding_output=True,
+        vae_input=True,
+        temperature=0.3,
+        max_think_token_n=4096,
+        extra_instruction="Do not think or generate any images.",
+    ),
     # Answer-only prompt with visual generation enabled (understanding_output=False).
     # Tests if the model generates useful sideview images without think prompting.
     "bagel_mot_nothink_vcot": partial(
